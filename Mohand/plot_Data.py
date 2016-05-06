@@ -50,16 +50,24 @@ for line in f:
         #print A
         plt.subplot(221)
         plt.plot(X,Y);
+        plt.ylabel('Y');
+        plt.xlabel('X');
         plt.axis([0,horiz,0,verti])
         #plt.show()
         plt.subplot(222)
         plt.plot(T[1:len(T)],D);
+        plt.ylabel('Distance from starting point');
+        plt.xlabel('Time');
         #plt.show()
         plt.subplot(223)
         plt.plot(T[1:len(T)],V);
+        plt.ylabel('Speed of cursor');
+        plt.xlabel('Time');
         #plt.show()
         plt.subplot(224)
         plt.plot(T[2:len(T)],A);
+        plt.ylabel('Acceleration of cursor');
+        plt.xlabel('Time');
         plt.show()
         old_x = x
         old_y = y
