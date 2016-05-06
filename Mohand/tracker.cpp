@@ -1,6 +1,7 @@
-// 1. draw circles and track mouse point - done
-// 2. write the coordinates of mousepoint to a file - done
-// 3. Plot the data and analyse further
+// All issues to be addressed to be written here in comments. 
+// 1. draw circles and track mouse point - DONE
+// 2. write the coordinates of mousepoint to a file - DONE
+// 3. Plot the data and analyse further - DONE
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
