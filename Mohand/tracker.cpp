@@ -2,6 +2,10 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <cstdio>
 #include <iostream>
+#include <string>
+#include <cstring>
+#include <sstream>
+#include <fstream>
 
 using namespace std;
 
@@ -35,7 +39,11 @@ int dist(cv::Point p1, cv::Point p2){
     return sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y));
 }
 
+
 int main(){
+  int subject;
+  cout<<"Enter Subject No.: ";
+  cin>>subject;
   int horiz,vert;
   cout<<"Enter Screen resolution:"<<endl<<"Horizontal: ";
   cin>>horiz;
@@ -45,9 +53,16 @@ int main(){
   cv::namedWindow("test",1);
   //cv::setWindowProperty("test",CV_WND_PROP_FULLSCREEN,CV_WINDOW_FULLSCREEN);
   cv::imshow("test",im);
+  cv::setMouseCallback("test",CallBackFunc,NULL);
   cv::waitKey(0);
-  int abortExp =0;
+
+  ostringstream SubNum;
+  SubNum<<subject;
+  string s = "Data/Subject"+SubNum.str()+"_Data.txt";
+  ofstream DatFile(s.c_str());
+
   for(int i=0;i<5;i++){
+      float t=0.0;
       cv::Point center = select_center(i);
       cout<<"drawing Circle "<<i<<" at "<<center.x<<center.y<<endl;
       im = cv::Mat(vert,horiz,CV_8UC1,cv::Scalar(0));
@@ -56,12 +71,12 @@ int main(){
           cv::setMouseCallback("test",CallBackFunc,NULL);
           cv::imshow("test",im);
           cout<<dist(center,cv::Point(px,py))<<endl;
-          if(cv::waitKey(33)==27){
-            abortExp = 1;
-            break;
+          if(cv::waitKey(50)==27){
+            return 0;
           }
+          DatFile<<i<<" "<<px<<", "<<py<<endl;
+          t+=0.05;
       }while(dist(center,cv::Point(px,py))>25);
-      if(abortExp)return 0;
   }
   return 0;
 }
