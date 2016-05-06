@@ -1,0 +1,16 @@
+all: axis
+
+axis: axis.cpp
+	g++ -g $^ -o $@ -Wall `pkg-config opencv --cflags --libs`
+
+checker: checker.cpp
+	g++ -g $^ -o $@ -Wall `pkg-config opencv --cflags --libs`
+
+rect_detect: rect_detect.cpp
+	g++ -g $^ -o $@ -Wall `pkg-config opencv --cflags --libs`
+
+axis_aggi: axis_aggi.cpp
+	g++ -g $^ -o $@ -Wall -llept -ltesseract `pkg-config opencv --cflags --libs`
+
+valid: validImage.cpp
+	g++ -g $^ -o $@ -Wall `pkg-config opencv --cflags --libs`
