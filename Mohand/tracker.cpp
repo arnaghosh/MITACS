@@ -108,5 +108,6 @@ int main(){
       }while(dist(center,cv::Point(px,py))>25);
       trial++;
   }
+  DatFile<<trial<<" "<<0<<" "<<0<<" "<<0.0<<endl;
   return 0;
 }
