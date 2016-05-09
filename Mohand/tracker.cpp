@@ -1,7 +1,8 @@
-// All issues to be addressed to be written here in comments. 
+// All issues to be addressed to be written here in comments.
 // 1. draw circles and track mouse point - DONE
 // 2. write the coordinates of mousepoint to a file - DONE
 // 3. Plot the data and analyse further - DONE
+// 4. Conversion factor variables update(screen_conv_ratio_h,v) - DONE
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -32,6 +33,11 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
      }
 }
 
+void screen_conv(int horiz, int vert){
+  screen_conv_ratio_h = (1.0*horiz)/1366;
+  screen_conv_ratio_v = (1.0*vert)/768;
+}
+
 //Select circle center from ID
 cv::Point select_center(int i){
   switch(i){
@@ -53,17 +59,22 @@ int dist(cv::Point p1, cv::Point p2){
 }
 
 
-int main(){
+int main(int argc, char** argv){
   int subject, dayNo;
-  cout<<"Enter Subject No.: ";
-  cin>>subject;
-  cout<<"Enter Day No.: ";
-  cin>>dayNo;
+  //cout<<"Enter Subject No.: ";
+  //cin>>subject;
+  subject = atoi(argv[1]);
+  //cout<<"Enter Day No.: ";
+  //cin>>dayNo;
+  dayNo = atoi(argv[2]);
   int horiz,vert;
-  cout<<"Enter Screen resolution:"<<endl<<"Horizontal: ";
-  cin>>horiz;
-  cout<<"Vertical: ";
-  cin>>vert;
+  //cout<<"Enter Screen resolution:"<<endl<<"Horizontal: ";
+  //cin>>horiz;
+  horiz = atoi(argv[3]);
+  //cout<<"Vertical: ";
+  //cin>>vert;
+  vert = atoi(argv[4]);
+  screen_conv(horiz,vert);
   cv::Mat im(vert,horiz,CV_8UC1,cv::Scalar(0));
   cv::namedWindow("test",1);
   //cv::setWindowProperty("test",CV_WND_PROP_FULLSCREEN,CV_WINDOW_FULLSCREEN);
