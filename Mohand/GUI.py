@@ -7,11 +7,16 @@ class Form:
     def window(self):
         app = QApplication(sys.argv)
         w = QWidget()
-        b = QPushButton(w)
-        b.setText("Record Tracking Data")
-        b.clicked.connect(self.runCPP)
+        record = QPushButton(w)
+        record.setText("Record Tracking Data")
+        record.clicked.connect(self.runCPP)
         w.setGeometry(50,50,700,500)
-        b.move(20,20)
+        record.move(20,20)
+
+        quit = QPushButton(w)
+        quit.setText("Quit")
+        quit.clicked.connect(self.quit)
+        quit.move(300,20)
 
         self.patient_label = QLabel(w)
         self.patient_label.setText("Enter Subject Number")
@@ -54,9 +59,9 @@ class Form:
         p = Popen([s], shell=True, stdout=PIPE, stdin=PIPE)
         result = p.stdout.readline().strip()
         print result
-        #value = input()
-        #p.stdin.write(value)
-        #p.stdin.flush()
+
+    def quit(self):
+        exit()
 
 if __name__ == '__main__':
     form = Form()
