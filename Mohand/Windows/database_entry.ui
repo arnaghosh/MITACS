@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>837</width>
+    <height>611</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>11</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Database Entry</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="SubjectNo">
+    <property name="geometry">
+     <rect>
+      <x>25</x>
+      <y>141</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Subject Number*</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_subNum">
+    <property name="geometry">
+     <rect>
+      <x>152</x>
+      <y>141</y>
+      <width>121</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="SubjectName">
+    <property name="geometry">
+     <rect>
+      <x>312</x>
+      <y>141</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Subject Name*</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_age">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>200</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Age</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_lang">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>270</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Native Tongue</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="combo_gender">
+    <property name="geometry">
+     <rect>
+      <x>383</x>
+      <y>200</y>
+      <width>83</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Male</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Female</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_gender">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>200</y>
+      <width>47</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Gender</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_lang">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>270</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>English</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_hand">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>270</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Dominant Hand</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="combo_hand">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>270</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Right</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Left</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLineEdit" name="text_age">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>200</y>
+      <width>167</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>20</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_occupation">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>340</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Occupation</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_occupation">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>340</y>
+      <width>261</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Student</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_leisure">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>400</y>
+      <width>201</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Frequency of Leisure Activity </string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="combo_leisure">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>400</y>
+      <width>161</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Almost Every Day</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>5 times per week</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2-3 times per week</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Once per week</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>&lt;1 per week</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_week">
+    <property name="geometry">
+     <rect>
+      <x>41</x>
+      <y>461</y>
+      <width>51</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Week*</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_week">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>461</y>
+      <width>167</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_time">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>460</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Time of Day</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="combo_time">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>460</y>
+      <width>121</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>9 to 11</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>11 to 13</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>13 to 15</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="button_submit">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>530</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Submit</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_clear">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>530</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clear</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_quit">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>530</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quit</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="logo1">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>10</y>
+      <width>181</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>13552-REPAR-COUL.png</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="logo2">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>10</y>
+      <width>231</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>medicine_logo_horiz_eng_outlined_750.png</pixmap>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_subjectName">
+    <property name="geometry">
+     <rect>
+      <x>429</x>
+      <y>141</y>
+      <width>401</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>abc</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_TDCS">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>340</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TDCS Number*</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_TDCS">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>340</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1</string>
+    </property>
+   </widget>
+   <zorder>SubjectNo</zorder>
+   <zorder>text_subNum</zorder>
+   <zorder>SubjectName</zorder>
+   <zorder>label_lang</zorder>
+   <zorder>combo_gender</zorder>
+   <zorder>label_gender</zorder>
+   <zorder>text_lang</zorder>
+   <zorder>label_hand</zorder>
+   <zorder>combo_hand</zorder>
+   <zorder>text_age</zorder>
+   <zorder>label_age</zorder>
+   <zorder>label_occupation</zorder>
+   <zorder>text_occupation</zorder>
+   <zorder>label_leisure</zorder>
+   <zorder>combo_leisure</zorder>
+   <zorder>label_week</zorder>
+   <zorder>text_week</zorder>
+   <zorder>label_time</zorder>
+   <zorder>combo_time</zorder>
+   <zorder>button_submit</zorder>
+   <zorder>button_clear</zorder>
+   <zorder>button_quit</zorder>
+   <zorder>logo1</zorder>
+   <zorder>logo2</zorder>
+   <zorder>text_subjectName</zorder>
+   <zorder>label_TDCS</zorder>
+   <zorder>text_TDCS</zorder>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>837</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
