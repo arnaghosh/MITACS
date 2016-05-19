@@ -7,6 +7,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 from analyseWin import Ui_MainWindow
+import mysql.connector
 
 horiz = GetSystemMetrics(0)
 vert = GetSystemMetrics(1)
@@ -20,6 +21,7 @@ def dayTitle(x):
         3 : '_Day3_',
         4 : '_Day4_',
         5 : '_Day5_',
+        6 : '_Baseline_',
     }.get(x,'_Performance_')
 
 def center_x(x):
@@ -90,6 +92,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.SequenceStrings.append(topics);
         self.RandomGoodStrings.append(topics);
         self.SequenceGoodStrings.append(topics);
+        self.cnx = mysql.connector.connect(user='root',password='ketchup',database='mohand');
+        self.cursor = self.cnx.cursor();
 
     def addplot(self, fig):
         #plt.savefig('common_labels_text.png', dpi=300)
@@ -140,7 +144,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         if self.dayNo<=5 :
             self.center_no = (5 * (self.dayNo-1) + self.blockNo-1) % self.center_array_size; 
         else :
-            self.center_no = (25 + self.blockNo % 2) % self.center_array_size;
+            self.center_no = (25 + self.dayNo % 2) % self.center_array_size;
         if int(self.tr_no)<len(self.center_array):
             present_target = (self.center_array[int(self.tr_no)][int(self.center_no)])%9;
         #print self.tr_no, present_target;
@@ -285,7 +289,81 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
             else:
                 self.RandomGoodStrings.append(self.AllStrings[len(self.AllStrings)-1]);
         self.deleteThisRecord = 0;
-        
+
+    def typeOfEntry(self,x):
+        return{
+            1: '_fil_rep',
+            2: '_fil_ran',
+            3: '_raw_rep',
+            4: '_raw_ran'
+            }.get(x)
+
+    def dayDatabase(self,x):
+        return{
+            1: 'day1',
+            2: 'day2',
+            3: 'day3',
+            4: 'day4'
+            }.get(x,'day5')
+
+    def deleteFromDatabase(self):
+        if self.dayNo==6:
+            day_str = "baseline";
+        elif self.dayNo<=5:
+            day_str = self.dayDatabase(self.dayNo);
+        else:
+            day_str = "performance";
+        s = "delete from "+day_str+" where subNo="+str(self.subjectNo);
+        self.cursor.execute(s);
+
+    def createDatabaseRecord(self):
+        if self.dayNo==6:
+            day_str = "baseline";
+        elif self.dayNo<=5:
+            day_str = self.dayDatabase(self.dayNo);
+        else:
+            day_str = "performance";
+        init_record = np.zeros(60);
+        s="insert into "+day_str+"(subNo) values("+str(self.subjectNo)+")";
+        self.cursor.execute(s);
+            
+    def writeToDatabase(self,entryType,meanReactionTime,meanMovementTime,meanResponseTime,meanMaxVel,meanMaxAcc,meanEPD,meanRealDist,meanTraversedDist,meanPerDev,ovMaxReactionTime,ovMaxMovementTime,ovMaxEPD,ovMaxSpeed,ovMaxAcc,indexVal):
+        entry_str = self.typeOfEntry(entryType);
+        print entryType,entry_str
+        if self.dayNo>5:
+            if self.dayNo==6:
+                day_str = "baseline";
+            else :
+                day_str = "performance";
+            s ="update "+day_str+" set meanReactionTime"+entry_str+"="+str(meanReactionTime)+",meanMovementTime"+entry_str+"="+str(meanMovementTime)+",meanResponseTime"+entry_str+"="+str(meanResponseTime)+",meanMaxVel"+entry_str+"="+str(meanMaxVel)+",meanMaxAcc"+entry_str+"="+str(meanMaxAcc)+",meanEPD"+entry_str+"="+str(meanEPD)+",meanRealDist"+entry_str+"="+str(meanRealDist)+",meanTraversedDist"+entry_str+"="+str(meanTraversedDist)+",meanPerDev"+entry_str+"="+str(meanPerDev)+",ovMaxReactionTime"+entry_str+"="+str(ovMaxReactionTime)+",ovMaxMovementTime"+entry_str+"="+str(ovMaxMovementTime)+",ovMaxEPD"+entry_str+"="+str(ovMaxEPD)+",ovMaxSpeed"+entry_str+"="+str(ovMaxSpeed)+",ovMaxAcc"+entry_str+"="+str(ovMaxAcc)+",indexVal"+entry_str+"="+str(indexVal)+" where subNo="+str(self.subjectNo);
+            self.cursor.execute(s);
+        else:
+            day_str = self.dayDatabase(self.dayNo);
+            if self.blockNo==1:             #query will return empty set or an old junk value. Generating block 1 data clears any old data already stored.
+                s ="update "+day_str+" set meanReactionTime"+entry_str+"="+str(meanReactionTime)+",meanMovementTime"+entry_str+"="+str(meanMovementTime)+",meanResponseTime"+entry_str+"="+str(meanResponseTime)+",meanMaxVel"+entry_str+"="+str(meanMaxVel)+",meanMaxAcc"+entry_str+"="+str(meanMaxAcc)+",meanEPD"+entry_str+"="+str(meanEPD)+",meanRealDist"+entry_str+"="+str(meanRealDist)+",meanTraversedDist"+entry_str+"="+str(meanTraversedDist)+",meanPerDev"+entry_str+"="+str(meanPerDev)+",ovMaxReactionTime"+entry_str+"="+str(ovMaxReactionTime)+",ovMaxMovementTime"+entry_str+"="+str(ovMaxMovementTime)+",ovMaxEPD"+entry_str+"="+str(ovMaxEPD)+",ovMaxSpeed"+entry_str+"="+str(ovMaxSpeed)+",ovMaxAcc"+entry_str+"="+str(ovMaxAcc)+",indexVal"+entry_str+"="+str(indexVal)+" where subNo="+str(self.subjectNo);
+                self.cursor.execute(s);
+            else:
+                s = "select meanReactionTime"+entry_str+",meanMovementTime"+entry_str+",meanResponseTime"+entry_str+",meanMaxVel"+entry_str+",meanMaxAcc"+entry_str++",meanEPD"+entry_str+",meanRealDist"+entry_str++",meanTraversedDist"+entry_str++",meanPerDev"+entry_str++",ovMaxReactionTime"+entry_str+",ovMaxMovementTime"+entry_str+",ovMaxEPD"+entry_str+",ovMaxSpeed"+entry_str+",ovMaxAcc"+entry_str+",indexVal"+entry_str+" from "+day_str+" where subNo="+str(self.subjectNo);
+                self.cursor.execute(s);
+                for (old_meanReactionTime,old_meanMovementTime,old_meanResponseTime,old_meanMaxVel,old_meanMaxAcc,old_meanEPD,old_meanRealDist,old_meanTraversedDist,old_meanPerDev,old_ovMaxReactionTime,old_ovMaxMovementTime,old_ovMaxEPD,old_ovMaxSpeed,old_ovMaxAcc,old_indexVal) in self.cursor:
+                    meanReactionTime = (float(old_meanReactionTime)*(self.blockNo-1)+meanReactionTime)/self.blockNo;
+                    meanMovementTime = (float(old_meanMovementTime)*(self.blockNo-1)+meanMovementTime)/self.blockNo;
+                    meanResponseTime = (float(old_meanResponseTime)*(self.blockNo-1)+meanResponseTime)/self.blockNo;
+                    meanMaxVel = (float(old_meanMaxVel)*(self.blockNo-1)+meanMaxVel)/self.blockNo;
+                    meanMaxAcc = (float(old_meanMaxAcc)*(self.blockNo-1)+meanMaxAcc)/self.blockNo;
+                    meanEPD = (float(old_meanEPD)*(self.blockNo-1)+meanEPD)/self.blockNo;
+                    meanRealDist = (float(old_meanRealDist)*(self.blockNo-1)+meanRealDist)/self.blockNo;
+                    meanTraversedDist = (float(old_meanTraversedDist)*(self.blockNo-1)+meanTraversedDist)/self.blockNo;
+                    meanPerDev = (float(old_meanPerDev)*(self.blockNo-1)+meanPerDev)/self.blockNo;
+                    ovMaxReactionTime = (float(old_ovMaxReactionTime)*(self.blockNo-1)+ovMaxReactionTime)/self.blockNo;
+                    ovMaxMovementTime = (float(old_ovMaxMovementTime)*(self.blockNo-1)+ovMaxMovementTime)/self.blockNo;
+                    ovMaxEPD = (float(old_ovMaxEPD*(self.blockNo-1))+ovMaxEPD)/self.blockNo;
+                    ovMaxSpeed = (float(old_ovMaxSpeed*(self.blockNo-1))+ovMaxSpeed)/self.blockNo;
+                    ovMaxAcc = (float(old_ovMaxAcc*(self.blockNo-1))+ovMaxAcc)/self.blockNo;
+                    indexVal = (float(old_indexVal*(self.blockNo-1))+indexVal)/self.blockNo;
+            s ="update "+day_str+" set meanReactionTime"+entry_str+"="+str(meanReactionTime)+",meanMovementTime"+entry_str+"="+str(meanMovementTime)+",meanResponseTime"+entry_str+"="+str(meanResponseTime)+",meanMaxVel"+entry_str+"="+str(meanMaxVel)+",meanMaxAcc"+entry_str+"="+str(meanMaxAcc)+",meanEPD"+entry_str+"="+str(meanEPD)+",meanRealDist"+entry_str+"="+str(meanRealDist)+",meanTraversedDist"+entry_str+"="+str(meanTraversedDist)+",meanPerDev"+entry_str+"="+str(meanPerDev)+",ovMaxReactionTime"+entry_str+"="+str(ovMaxReactionTime)+",ovMaxMovementTime"+entry_str+"="+str(ovMaxMovementTime)+",ovMaxEPD"+entry_str+"="+str(ovMaxEPD)+",ovMaxSpeed"+entry_str+"="+str(ovMaxSpeed)+",ovMaxAcc"+entry_str+"="+str(ovMaxAcc)+",indexVal"+entry_str+"="+str(indexVal)+" where subNo="+str(self.subjectNo);
+            self.cursor.execute(s);
+
     def generateRecord(self):
         self.writeToFilteredFile();
         self.generateAll = 1;
@@ -296,9 +374,9 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         raw_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileAll.txt";
         filter_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileAll.txt";
         rand_raw_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRandom.txt";
-        seq_raw_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileSequence.txt";
+        seq_raw_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRepeated.txt";
         rand_filter_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRandom.txt";
-        seq_filter_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileSequence.txt";
+        seq_filter_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRepeated.txt";
         rawFile = open(raw_s,'w');
         rand_rawFile = open(rand_raw_s, 'w');
         seq_rawFile = open(seq_raw_s, 'w');
@@ -371,6 +449,13 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         filterFile.write(res_str);
 
+        if self.blockNo==1:
+            self.deleteFromDatabase();
+            self.createDatabaseRecord();
+        if self.dayNo>5:
+            self.deleteFromDatabase();
+            self.createDatabaseRecord();
+        
         A = np.zeros(9);
         max_react,max_move,max_epd,max_vel,max_acc = 0,0,0,0,0;
         for i in range(len(self.RandomStrings)):
@@ -395,6 +480,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         index_val = index_val*10/6;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         rand_rawFile.write(res_str);
+        self.writeToDatabase(4,A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],max_react,max_move,max_epd,max_vel,max_acc,index_val);
 
         A = np.zeros(9);
         max_react,max_move,max_epd,max_vel,max_acc = 0,0,0,0,0;
@@ -420,6 +506,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         index_val = index_val*10/6;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         seq_rawFile.write(res_str);
+        self.writeToDatabase(3,A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],max_react,max_move,max_epd,max_vel,max_acc,index_val);
 
         A = np.zeros(9);
         max_react,max_move,max_epd,max_vel,max_acc = 0,0,0,0,0;
@@ -445,6 +532,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         index_val = index_val*10/6;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         rand_filterFile.write(res_str);
+        self.writeToDatabase(2,A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],max_react,max_move,max_epd,max_vel,max_acc,index_val);
 
         A = np.zeros(9);
         max_react,max_move,max_epd,max_vel,max_acc = 0,0,0,0,0;
@@ -470,6 +558,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         index_val = index_val*10/6;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         seq_filterFile.write(res_str);
+        self.writeToDatabase(1,A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],max_react,max_move,max_epd,max_vel,max_acc,index_val);
         
         print "written analysis files"
 
@@ -478,6 +567,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.deleteThisRecord = 1;
 
     def quit(self):
+        self.cnx.commit();
+        self.cnx.close();
         exit()
  
 if __name__ == '__main__':
