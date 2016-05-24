@@ -86,16 +86,19 @@ int main(int argc, char** argv) {
 	blockNum << block;
 	string day;
 	switch (dayNo) {
-		case 1: day = "_Day1_"; break;
-		case 2: day = "_Day2_"; break;
-		case 3: day = "_Day3_"; break;
-		case 4: day = "_Day4_"; break;
-		case 5: day = "_Day5_"; break;
-		default: day = "_Performance_";
+	case 1: day = "_Day1_"; break;
+	case 2: day = "_Day2_"; break;
+	case 3: day = "_Day3_"; break;
+	case 4: day = "_Day4_"; break;
+	case 5: day = "_Day5_"; break;
+	case 6: day = "_Baseline_"; break;
+	default: day = "_Performance_";
 	}
-	string s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+SubNum.str()+"\\Subject" + SubNum.str() + day + "Block" + blockNum.str() + "_Data.txt";
+	string s;
+	if(dayNo<=5) s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject " + SubNum.str() + "\\Subject" + SubNum.str() + day + "Block" + blockNum.str() + "_Data.txt";
+	else s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject " + SubNum.str() + "\\Subject" + SubNum.str() + day +  "Data.txt";
 	ofstream DatFile(s.c_str());
-	ifstream sequence("C:\\Users\\neuro\\Documents\\Visual Studio 2015\\Projects\\MohandTracker\\Mohands(2,2,2).txt");
+	ifstream sequence("C:\\Users\\Arna\\Documents\\Visual Studio 2015\\Projects\\Mohand\'sTracker1\\Mohands(2,2,2).txt");
 	string line;
 
 	int trial = 0;
@@ -109,10 +112,10 @@ int main(int argc, char** argv) {
 			iv.push_back(num);
 		}
 		int i;
-		if(dayNo<=5) i = iv[(5 * (dayNo - 1) + block) % iv.size()];
-		else i = iv[(25 + block % 2) % iv.size()];
+		if (dayNo <= 5) i = iv[(5 * (dayNo - 1) + block-1) % iv.size()];
+		else i = iv[(25 + dayNo % 2) % iv.size()];
 		float t = 0.0;
-		cv::Point center = select_center(i);
+		cv::Point center = select_center(i%9);
 		//cout<<"drawing Circle "<<i<<" at "<<center.x<<center.y<<endl;
 		im = cv::Mat(vert, horiz, CV_8UC1, cv::Scalar(0));
 		cv::circle(im, center, 50, cv::Scalar(255), 2);
