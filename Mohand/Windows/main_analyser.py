@@ -111,6 +111,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
 
     def loadFile(self):
         print "load file"
+        self.generateAll = 0;
         subNo = self.SubjectText.text()
         d = self.DayCombo.currentIndex()
         self.subjectNo = int(subNo);
@@ -343,7 +344,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                 s ="update "+day_str+" set meanReactionTime"+entry_str+"="+str(meanReactionTime)+",meanMovementTime"+entry_str+"="+str(meanMovementTime)+",meanResponseTime"+entry_str+"="+str(meanResponseTime)+",meanMaxVel"+entry_str+"="+str(meanMaxVel)+",meanMaxAcc"+entry_str+"="+str(meanMaxAcc)+",meanEPD"+entry_str+"="+str(meanEPD)+",meanRealDist"+entry_str+"="+str(meanRealDist)+",meanTraversedDist"+entry_str+"="+str(meanTraversedDist)+",meanPerDev"+entry_str+"="+str(meanPerDev)+",ovMaxReactionTime"+entry_str+"="+str(ovMaxReactionTime)+",ovMaxMovementTime"+entry_str+"="+str(ovMaxMovementTime)+",ovMaxEPD"+entry_str+"="+str(ovMaxEPD)+",ovMaxSpeed"+entry_str+"="+str(ovMaxSpeed)+",ovMaxAcc"+entry_str+"="+str(ovMaxAcc)+",indexVal"+entry_str+"="+str(indexVal)+" where subNo="+str(self.subjectNo);
                 self.cursor.execute(s);
             else:
-                s = "select meanReactionTime"+entry_str+",meanMovementTime"+entry_str+",meanResponseTime"+entry_str+",meanMaxVel"+entry_str+",meanMaxAcc"+entry_str++",meanEPD"+entry_str+",meanRealDist"+entry_str++",meanTraversedDist"+entry_str++",meanPerDev"+entry_str++",ovMaxReactionTime"+entry_str+",ovMaxMovementTime"+entry_str+",ovMaxEPD"+entry_str+",ovMaxSpeed"+entry_str+",ovMaxAcc"+entry_str+",indexVal"+entry_str+" from "+day_str+" where subNo="+str(self.subjectNo);
+                s = "select meanReactionTime"+entry_str+",meanMovementTime"+entry_str+",meanResponseTime"+entry_str+",meanMaxVel"+entry_str+",meanMaxAcc"+entry_str+",meanEPD"+entry_str+",meanRealDist"+entry_str+",meanTraversedDist"+entry_str+",meanPerDev"+entry_str+",ovMaxReactionTime"+entry_str+",ovMaxMovementTime"+entry_str+",ovMaxEPD"+entry_str+",ovMaxSpeed"+entry_str+",ovMaxAcc"+entry_str+",indexVal"+entry_str+" from "+day_str+" where subNo="+str(self.subjectNo);
                 self.cursor.execute(s);
                 for (old_meanReactionTime,old_meanMovementTime,old_meanResponseTime,old_meanMaxVel,old_meanMaxAcc,old_meanEPD,old_meanRealDist,old_meanTraversedDist,old_meanPerDev,old_ovMaxReactionTime,old_ovMaxMovementTime,old_ovMaxEPD,old_ovMaxSpeed,old_ovMaxAcc,old_indexVal) in self.cursor:
                     meanReactionTime = (float(old_meanReactionTime)*(self.blockNo-1)+meanReactionTime)/self.blockNo;
