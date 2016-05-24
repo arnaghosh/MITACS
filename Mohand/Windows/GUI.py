@@ -13,6 +13,7 @@ def dayTitle(x):
         3 : '_Day3_',
         4 : '_Day4_',
         5 : '_Day5_',
+        6 : '_Baseline_',
     }.get(x,'_Performance_')
 
 class Form:
@@ -52,7 +53,7 @@ class Form:
         self.patient_text.move(250,120)
 
         self.day_label = QLabel(w)
-        self.day_label.setText("Enter Day (6 for baseline and retention)")
+        self.day_label.setText("Enter Day (6 for baseline and 7 for retention)")
         self.day_label.move(20,170)
         self.day_text = QLineEdit(w)
         self.day_text.move(250,170)
@@ -97,9 +98,9 @@ class Form:
         block = self.block_text.text()
         horiz = self.Horiz_text.text()
         vert = self.Vert_text.text()
-        s1 = 'C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject ' + str(subNo)+'\\';
+        s1 = 'C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject ' + str(subNo)+'\\';
         self.ensure_dir(s1);
-        s = '"C:\\Users\\neuro\\Documents\\Visual Studio 2015\\Projects\\MohandTracker\\Debug\\MohandTracker.exe" ' + subNo + ' ' + dayNo + ' ' + block +' ' + horiz + ' ' + vert;
+        s = '"C:\\Users\\Arna\\Documents\\Visual Studio 2015\\Projects\\Mohand\'sTracker1\\Debug\\Mohand\'sTracker1.exe" ' + subNo + ' ' + dayNo + ' ' + block +' ' + horiz + ' ' + vert;
         p = Popen(str(s), shell=True, stdout=PIPE, stdin=PIPE)
         result = p.stdout.readline().strip()
         print result
