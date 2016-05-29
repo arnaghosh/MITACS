@@ -273,6 +273,9 @@ class Present_PERFORM:
             if globalTrialON[i]==1 and globalTrialON[i-1]==0:
                 t_ref = globalTimeValues[i];
             if globalTrialON[i]==1:
+                if (globalTimeValues[i]-t_ref)>3.0 and (self.timeValues[len(self.timeValues)-1]>=3.0):
+                    globalTrialON[i]=0;
+                    continue;
                 self.dataValues = np.append(self.dataValues,globalDataValues[i]);
                 self.timeValues = np.append(self.timeValues,globalTimeValues[i]-t_ref);
 
