@@ -25,8 +25,10 @@ class dataThread(threading.Thread):
         global globalDataValues, globalTimeValues, globalTrialON, t0, lastDataValue
         while(1):
             if self.pause ==1:
-                time.sleep(1);
                 self.pause = 0;
+                globalDataValues = np.empty(0);
+                globalTimeValues = np.empty(0);
+                globalTrialON = np.empty(0);
                 t0 = time.clock();
             t1 = time.clock();
             samples = self.mp.sample();
@@ -171,7 +173,6 @@ class Present_PERFORM:
             cv2.waitKey(10);
         
     def gripperTask(self, totalTrials, dThread):
-        global globalDataValues, globalTimeValues, globalTrialON, t0
         task2 = self.basImg1.copy();
         task3 = self.basImg2.copy();
         cv2.putText(task2, "Squeeze to reach the red target bar ",(int(self.width1/10),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
@@ -185,10 +186,7 @@ class Present_PERFORM:
                 break;
         
         trialNo = 1;
-        dThread.pause = 1;
-        globalDataValues = np.empty(0);
-        globalTimeValues = np.empty(0);
-        globalTrialON = np.empty(0);
+        dThread.pause = 1;        
         
         while( trialNo<= totalTrials):
             task2 = self.basImg1.copy();
@@ -275,6 +273,9 @@ class Present_PERFORM:
             if globalTrialON[i]==1 and globalTrialON[i-1]==0:
                 t_ref = globalTimeValues[i];
             if globalTrialON[i]==1:
+                if (globalTimeValues[i]-t_ref)>3.0 and (self.timeValues[len(self.timeValues)-1]>=3.0):
+                    globalTrialON[i]=0;
+                    continue;
                 self.dataValues = np.append(self.dataValues,globalDataValues[i]);
                 self.timeValues = np.append(self.timeValues,globalTimeValues[i]-t_ref);
 
@@ -288,7 +289,11 @@ class Present_PERFORM:
         t1 = [];
         trialNo =1;
         labels=[];
+        already_done = 0;
         for i in range(len(self.dataValues)):
+            if already_done==1:
+                already_done=0;
+                continue;            
             d_temp = self.dataValues[i];
             t_temp = self.timeValues[i];
             if i==0:
@@ -310,7 +315,7 @@ class Present_PERFORM:
                     t.append(t_temp);
                     d_temp = self.dataValues[i+1];
                     t_temp = self.timeValues[i+1];
-                    i=i+1;
+                    already_done=1;
                 print d_temp,t_temp;
                 s = 'Trial '+str(trialNo);
                 labels.append(plt.plot(t,d,label=s));
