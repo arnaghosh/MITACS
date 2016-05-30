@@ -340,7 +340,7 @@ class Present_PERFORM:
                     d_temp = self.dataValues[i+1];
                     t_temp = self.timeValues[i+1];
                     already_done=1;
-                print d_temp,t_temp;
+                #print d_temp,t_temp;
                 s = 'Trial '+str(trialNo);
                 labels.append(plt.plot(t,d,label=s));
                 d=[d_temp];
