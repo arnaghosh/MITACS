@@ -62,7 +62,7 @@ class Present_PERFORM:
         cv2.imshow("operator",self.basImg2);
         self.val = 0;
         self.constMax = 6;
-        self.constBufferTime = 0; #in seconds
+        self.constDummyTime = 0;#2; #in seconds = Tr = 2seconds.
         self.maxVal = -100;
         self.init = 0;
         #self.mp = MP150();
@@ -158,7 +158,7 @@ class Present_PERFORM:
         cv2.imshow("operator",self.basImg2);
 
     def drawTarget(self,img1,img2,percentTarget):
-        percentTarget_scaled = percentTarget*100/60;
+        percentTarget_scaled = percentTarget*100/40; #division to scale the full to 40 percent
         height1, width1, ch1 = img1.shape;
         height2, width2, ch2 = img2.shape;
         H = percentTarget_scaled-1; #change initial value to allow target to rise or appear directly.
@@ -173,6 +173,7 @@ class Present_PERFORM:
             cv2.waitKey(10);
         
     def gripperTask(self, totalTrials, dThread):
+        jitter_time_array = np.loadtxt("data\\Jitter_time.txt");
         task2 = self.basImg1.copy();
         task3 = self.basImg2.copy();
         cv2.putText(task2, "Squeeze to reach the red target bar ",(int(self.width1/10),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
@@ -195,14 +196,22 @@ class Present_PERFORM:
             cv2.putText(task3, "READY",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
             cv2.imshow("display",task2);
             cv2.imshow("operator",task3);
-            cv2.waitKey(1000);
+            t0_2 = time.clock();
+            t1_2 = time.clock();
+            while((t1_2 - t0_2)<=1):
+                t1_2 = time.clock();
+                cv2.waitKey(10);
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy();    
             cv2.putText(task2, "SET",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
             cv2.putText(task3, "SET",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
             cv2.imshow("display",task2);
             cv2.imshow("operator",task3);
-            cv2.waitKey(1000);
+            t0_2 = time.clock();
+            t1_2 = time.clock();
+            while((t1_2 - t0_2)<=1):
+                t1_2 = time.clock();
+                cv2.waitKey(10);
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy(); 
             cv2.putText(task2, "GO",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
@@ -210,10 +219,15 @@ class Present_PERFORM:
             cv2.imshow("display",task2);
             cv2.imshow("operator",task3);
             t03 = time.time();
-            cv2.waitKey(500);
+            t0_2 = time.clock();
+            t1_2 = time.clock();
+            while((t1_2 - t0_2)*1000<=500):
+                t1_2 = time.clock();
+                cv2.waitKey(10);
             if trialNo==1:
                 while(1):
                     if cv2.waitKey(10)==61:
+                        time.sleep(4*self.constDummyTime+0.001);
                         break;
             taskImg1 = self.basImg1.copy();
             taskImg2 = self.basImg2.copy();
@@ -221,7 +235,7 @@ class Present_PERFORM:
             cv2.rectangle(taskImg1, (int(2*self.width1/5),int(0.8*self.height1)),(int(3*self.width1/5),int(0.9*self.height1)),(255,0,0),-1);
             cv2.rectangle(taskImg2, (int(self.width2/3),int(0.1*self.height2)),(int(2*self.width2/3),int(0.9*self.height2)),(255,255,255),-1);
             cv2.rectangle(taskImg2, (int(self.width2/3),int(0.8*self.height2)),(int(2*self.width2/3),int(0.9*self.height2)),(255,0,0),-1);
-            percentTarget = 30; #in percentage
+            percentTarget = 20; #in percentage
             self.drawTarget(taskImg1,taskImg2,percentTarget);
             t01 = time.time();
             dThread.trialON = 1;
@@ -230,7 +244,7 @@ class Present_PERFORM:
                 task3 = taskImg2.copy();
                 self.gripperVal();
                 current_pos = (self.val-self.init)*1.0/(self.maxVal - self.init);
-                current_pos_scaled = current_pos*1.0/0.6;
+                current_pos_scaled = current_pos*1.0/0.4;
                 if current_pos_scaled<0:
                     current_pos_scaled = 0;
                 if current_pos_scaled >1:
@@ -247,10 +261,11 @@ class Present_PERFORM:
                     trialNo = totalTrials+1;
                     break;
                 t11 = time.time();
-                if (t11-t01)> 3.0:
+                if (t11-t01)> 3.5:
                     break;
             dThread.trialON = 0;
             s = "Trial "+str(trialNo)+" done.";
+            jitter_time = jitter_time_array[trialNo-1];
             trialNo = trialNo + 1;
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy();            
@@ -258,7 +273,6 @@ class Present_PERFORM:
             cv2.putText(task3, s,(int(self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
             cv2.imshow("display",task2);
             cv2.imshow("operator",task3);
-            jitter_time = int(np.random.uniform(2500));
             t_0 = time.clock();
             t_1 = time.clock();
             while((t_1 - t_0)*1000<=jitter_time):
@@ -266,22 +280,32 @@ class Present_PERFORM:
                 cv2.waitKey(10);
         dThread.exit = 1;
         dThread.close();
-        self.filename = "data\\"+self.filename+".txt";
+        folder_name = "data\\"+self.filename+"\\";
+        self.ensure_dir(folder_name);
+        self.AllDatafilename = folder_name+self.filename+"_allData.txt";
+        self.filename = folder_name+self.filename+".txt";
         for i in range(len(globalDataValues)):
             if i==0:
                 continue;
             if globalTrialON[i]==1 and globalTrialON[i-1]==0:
                 t_ref = globalTimeValues[i];
             if globalTrialON[i]==1:
-                if (globalTimeValues[i]-t_ref)>3.0 and (self.timeValues[len(self.timeValues)-1]>=3.0):
+                if (globalTimeValues[i]-t_ref)>3.5 and (self.timeValues[len(self.timeValues)-1]>=3.5):
                     globalTrialON[i]=0;
                     continue;
                 self.dataValues = np.append(self.dataValues,globalDataValues[i]);
                 self.timeValues = np.append(self.timeValues,globalTimeValues[i]-t_ref);
 
         self.dataValues = self.dataValues - self.init;
-        np.savetxt(self.filename,(self.dataValues,self.timeValues),newline='\n');
+        np.savetxt(self.filename,np.column_stack((self.dataValues,self.timeValues)),newline='\n');
+        np.savetxt(self.AllDatafilename,np.column_stack((globalDataValues,globalTrialON,globalTimeValues)),newline='\n');
             
+    def ensure_dir(self,f):
+        d = os.path.dirname(f)
+        print os.path.exists(d)
+        if not os.path.exists(d):
+            os.makedirs(d)
+
     def plotGripperData(self):
         global globalDataValues, globalTrialON
         d = [];
@@ -306,11 +330,11 @@ class Present_PERFORM:
                 s = 'Trial '+str(trialNo);
                 labels.append(plt.plot(t,d,label=s));
                 continue;
-            if t_temp<3.0 and t_temp>0.001:
+            if t_temp<3.5 and t_temp>0.001:
                 d.append(d_temp);
                 t.append(t_temp);
             else:
-                if t_temp>=3.0:
+                if t_temp>=3.5:
                     d.append(d_temp);
                     t.append(t_temp);
                     d_temp = self.dataValues[i+1];
@@ -323,7 +347,7 @@ class Present_PERFORM:
                 t1 = t;
                 t=[t_temp];
                 trialNo = trialNo+1;
-        ref = [0.3*(self.maxVal-self.init)]*len(t1);
+        ref = [0.2*(self.maxVal-self.init)]*len(t1);
         labels.append(plt.plot(t1,ref,label='Target'));
         plt.legend(loc='best');
         plt.xlabel('Time');
@@ -333,7 +357,7 @@ class Present_PERFORM:
         labels = [];
         print len(globalDataValues), len(globalTrialON), len(globalTimeValues);
         globalDataValues = globalDataValues - self.init;
-        globalTrialON = globalTrialON*(0.3*(self.maxVal-self.init));
+        globalTrialON = globalTrialON*(0.2*(self.maxVal-self.init));
         labels.append(plt.plot(globalTimeValues,globalDataValues,label="Gripper data"));
         labels.append(plt.plot(globalTimeValues,globalTrialON,label="Target shown"));
         plt.legend(loc='best');
@@ -352,6 +376,7 @@ if __name__=='__main__':
     obj.gripperInit();
     print obj.init;
     obj.getGripperMax();
+    #print obj.maxVal;
     T_start = time.clock();
     obj.gripperTask(50,dThread);
     T_end = time.clock();
