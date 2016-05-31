@@ -10,12 +10,14 @@
 #include <fstream>
 #include <ctime>
 #include <vector>
+#include <Windows.h>
 #include <opencv2\highgui\highgui.hpp>
 #include <opencv2\imgproc\imgproc.hpp>
 
 using namespace std;
 //written for a monitor of default resolution 1366 X 768
 
+#define movement_stop_thresh 2
 int px = 0, py = 0;
 float screen_conv_ratio_h = 1.0;
 float screen_conv_ratio_v = 1.0;
@@ -92,15 +94,48 @@ int main(int argc, char** argv) {
 	case 4: day = "_Day4_"; break;
 	case 5: day = "_Day5_"; break;
 	case 6: day = "_Baseline_"; break;
-	default: day = "_Performance_";
+	case 7: day = "_Performance_"; break;
+	default: day = "_Familiarisation_";
+	}
+	SetCursorPos(horiz / 2, vert / 2);
+	int old_curx = (int)horiz / 2;
+	int old_cury = (int)vert / 2;
+	if (dayNo > 7) {
+		for (int i = 0; i < 10; i++) {
+			cv::Point center = select_center(i % 9);
+			im = cv::Mat(vert, horiz, CV_8UC1, cv::Scalar(0));
+			cv::circle(im, center, 50, cv::Scalar(255), 2);
+			int continuous_stay = 0;
+			int movement_stopped = 0;
+			do {
+				cv::setMouseCallback("test", CallBackFunc, NULL);
+				cv::imshow("test", im);
+				if (cv::waitKey(5) == 27) {
+					return 0;
+				}
+				if (dist(center, cv::Point(px, py)) < 50) {
+					continuous_stay++;
+					if (dist(cv::Point(old_curx, old_cury), cv::Point(px, py)) <= movement_stop_thresh)
+						movement_stopped++;
+					else
+						movement_stopped = 0;
+				}
+				else {
+					continuous_stay = 0;
+					movement_stopped = 0;
+				}
+				old_curx = px;
+				old_cury = py;
+			} while (continuous_stay<15 || movement_stopped<10);
+		}
+		return 0;
 	}
 	string s;
-	if(dayNo<=5) s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject " + SubNum.str() + "\\Subject" + SubNum.str() + day + "Block" + blockNum.str() + "_Data.txt";
-	else s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject " + SubNum.str() + "\\Subject" + SubNum.str() + day +  "Data.txt";
+	if (dayNo <= 5) s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject " + SubNum.str() + "\\Subject" + SubNum.str() + day + "Block" + blockNum.str() + "_Data.txt";
+	else s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject " + SubNum.str() + "\\Subject" + SubNum.str() + day + "Data.txt";
 	ofstream DatFile(s.c_str());
-	ifstream sequence("C:\\Users\\Arna\\Documents\\Visual Studio 2015\\Projects\\Mohand\'sTracker1\\Mohands(2,2,2).txt");
+	ifstream sequence("C:\\Users\\neuro\\Documents\\Visual Studio 2015\\Projects\\MohandTracker\\Mohands(2,2,2).txt");
 	string line;
-
 	int trial = 0;
 	while (getline(sequence, line)) {
 		if (trial == 0)cout << "Started" << endl;
@@ -112,15 +147,16 @@ int main(int argc, char** argv) {
 			iv.push_back(num);
 		}
 		int i;
-		if (dayNo <= 5) i = iv[(5 * (dayNo - 1) + block-1) % iv.size()];
+		if (dayNo <= 5) i = iv[(5 * (dayNo - 1) + block - 1) % iv.size()];
 		else i = iv[(25 + dayNo % 2) % iv.size()];
 		float t = 0.0;
-		cv::Point center = select_center(i%9);
+		cv::Point center = select_center(i % 9);
 		//cout<<"drawing Circle "<<i<<" at "<<center.x<<center.y<<endl;
 		im = cv::Mat(vert, horiz, CV_8UC1, cv::Scalar(0));
 		cv::circle(im, center, 50, cv::Scalar(255), 2);
 		clock_t Start = clock();
 		int continuous_stay = 0;
+		int movement_stopped = 0;
 		do {
 			cv::setMouseCallback("test", CallBackFunc, NULL);
 			cv::imshow("test", im);
@@ -128,13 +164,26 @@ int main(int argc, char** argv) {
 			if (cv::waitKey(5) == 27) {
 				return 0;
 			}
-			if (dist(center, cv::Point(px, py)) < 50)continuous_stay++;
-			else continuous_stay = 0;
-			if (trial>0)DatFile << trial << " " << px << " " << py << " " << t << endl;
+			if (dist(center, cv::Point(px, py)) < 50) {
+				continuous_stay++;
+				if (dist(cv::Point(old_curx, old_cury), cv::Point(px, py)) <= movement_stop_thresh) {
+					movement_stopped++;
+					//cout << "stopped ";
+				}
+				else
+					movement_stopped = 0;
+			}
+			else {
+				continuous_stay = 0;
+				movement_stopped = 0;
+			}
+			old_curx = px;
+			old_cury = py;
+			DatFile << trial << " " << px << " " << py << " " << t << endl;
 			t = ((float)(clock() - Start) / CLOCKS_PER_SEC);
-		} while (continuous_stay<15);
+		} while (continuous_stay<15 || movement_stopped<10);
 		trial++;
 	}
-	DatFile << trial << " " << 0 << " " << 0 << " " << 0.0 << endl;
+	//DatFile << trial << " " << 0 << " " << 0 << " " << 0.0 << endl;
 	return 0;
 }
