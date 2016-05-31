@@ -18,6 +18,7 @@ using namespace std;
 //written for a monitor of default resolution 1366 X 768
 
 #define movement_stop_thresh 2
+int f_array[5] = { 3, 8, 6, 4, 1 };
 int px = 0, py = 0;
 float screen_conv_ratio_h = 1.0;
 float screen_conv_ratio_v = 1.0;
@@ -101,8 +102,9 @@ int main(int argc, char** argv) {
 	int old_curx = (int)horiz / 2;
 	int old_cury = (int)vert / 2;
 	if (dayNo > 7) {
-		for (int i = 0; i < 10; i++) {
-			cv::Point center = select_center(i % 9);
+		for (int i = 0; i < 5; i++) {
+
+			cv::Point center = select_center(f_array[i] % 9);
 			im = cv::Mat(vert, horiz, CV_8UC1, cv::Scalar(0));
 			cv::circle(im, center, 50, cv::Scalar(255), 2);
 			int continuous_stay = 0;
@@ -134,7 +136,7 @@ int main(int argc, char** argv) {
 	if (dayNo <= 5) s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject " + SubNum.str() + "\\Subject" + SubNum.str() + day + "Block" + blockNum.str() + "_Data.txt";
 	else s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject " + SubNum.str() + "\\Subject" + SubNum.str() + day + "Data.txt";
 	ofstream DatFile(s.c_str());
-	ifstream sequence("C:\\Users\\neuro\\Documents\\Visual Studio 2015\\Projects\\MohandTracker\\Mohands(2,2,2).txt");
+	ifstream sequence("C:\\Users\\neuro\\Documents\\Visual Studio 2015\\Projects\\MohandTracker\\Mohands(4,6,5).txt");
 	string line;
 	int trial = 0;
 	while (getline(sequence, line)) {
