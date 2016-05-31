@@ -131,7 +131,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.center_array = [[int(x) for x in line.split()] for line in self.center_file];
         #print self.center_array
         self.center_array_size = len(self.center_array[0]);
-        self.tr_no = 1;
+        self.tr_no = 0;
         self.start = 0;
         self.getFig();
         
@@ -196,8 +196,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
 
             else:
                 print "len",len(self.T), len(self.D)
-                if self.T[len(self.T)-1]<=0.007 or self.T[len(self.T)-1]>=12:
-                    self.deleteThisRecord = 1;
+                if self.T[len(self.T)-1]<=0.007 or self.T[len(self.T)-1]>=12:           #filtering records based on the protocol.
+                    self.deleteThisRecord = 1;                              
                 if self.generateAll==0:
                     fig = plt.figure()
                     a1 = fig.add_subplot(221)
@@ -537,7 +537,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                 max_acc = tdnp[4];
             A = A+tdnp;
         A = A/(len(self.RandomGoodStrings));
-       index_val = ((100-A[8])/100)+((49.7-A[5])/49.7)+((1.165-A[0])/1.165);
+        index_val = ((100-A[8])/100)+((49.7-A[5])/49.7)+((1.165-A[0])/1.165);
         index_val = index_val*10/3;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         rand_filterFile.write(res_str);
