@@ -92,7 +92,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.SequenceStrings.append(topics);
         self.RandomGoodStrings.append(topics);
         self.SequenceGoodStrings.append(topics);
-        self.cnx = mysql.connector.connect(user='root',password='ketchup',database='mohand');
+        self.cnx = mysql.connector.connect(user='root',password='neuro',database='mohand');
         self.cursor = self.cnx.cursor();
 
     def addplot(self, fig):
@@ -112,6 +112,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
     def loadFile(self):
         print "load file"
         self.generateAll = 0;
+        self.fileReadDone = 0;
         subNo = self.SubjectText.text()
         d = self.DayCombo.currentIndex()
         self.subjectNo = int(subNo);
@@ -119,8 +120,11 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.blockNo = self.BlockCombo.currentIndex()+1 
         block = str(self.blockNo);
         day = dayTitle(self.dayNo)
-        s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+subNo+"\\Subject" + subNo + day + "Block" + block + "_Data.txt";
-        center_file_s = "C:\\Users\\Arna\\Documents\\Visual Studio 2015\\Projects\\Mohand\'sTracker1\\Mohands(2,2,2).txt";
+        if self.dayNo<=5:
+            s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+subNo+"\\Subject" + subNo + day + "Block" + block + "_Data.txt";
+        else:
+            s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+subNo+"\\Subject" + subNo + day + "Data.txt";
+        center_file_s = "C:\\Users\\neuro\\Documents\\Visual Studio 2015\\Projects\\MohandTracker\\Mohands(4,6,5).txt";
         print s
         self.file = open(s, 'r');
         self.center_file = open(center_file_s, 'r');
@@ -192,6 +196,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
 
             else:
                 print "len",len(self.T), len(self.D)
+                if self.T[len(self.T)-1]<=0.007 or self.T[len(self.T)-1]>=12:
+                    self.deleteThisRecord = 1;
                 if self.generateAll==0:
                     fig = plt.figure()
                     a1 = fig.add_subplot(221)
@@ -372,12 +378,12 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
             self.getFig();
             self.writeToFilteredFile();
             
-        raw_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileAll.txt";
-        filter_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileAll.txt";
-        rand_raw_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRandom.txt";
-        seq_raw_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRepeated.txt";
-        rand_filter_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRandom.txt";
-        seq_filter_s = "C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRepeated.txt";
+        raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileAll.txt";
+        filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileAll.txt";
+        rand_raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRandom.txt";
+        seq_raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRepeated.txt";
+        rand_filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRandom.txt";
+        seq_filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRepeated.txt";
         rawFile = open(raw_s,'w');
         rand_rawFile = open(rand_raw_s, 'w');
         seq_rawFile = open(seq_raw_s, 'w');
@@ -412,16 +418,18 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                 max_react = tdnp[0];
             if tdnp[1]>max_move:
                 max_move = tdnp[1];
-            if tdnp[3]>max_epd:
+            if tdnp[5]>max_epd:
                 max_epd = tdnp[5];
-            if tdnp[4]>max_vel:
+            if tdnp[3]>max_vel:
                 max_vel = tdnp[3];
-            if tdnp[5]>max_acc:
+            if tdnp[4]>max_acc:
                 max_acc = tdnp[4];
             A = A+tdnp;
         A = A/(len(self.AllStrings));
-        index_val = (A[3]/12478)+(A[4]/1110120)+((0.64-A[1])/0.64)+((0.328-A[0])/0.328)+((100-A[8])/100)+((30.36-A[5])/30.36);
-        index_val = index_val*10/6;
+        ##index_val = (A[3]/2330)+(A[4]/119289)+((2.389-A[1])/2.389)+((1.165-A[0])/1.165)+((100-A[8])/100)+((49.7-A[5])/49.7);
+        ##index_val = index_val*10/6;
+        index_val = ((100-A[8])/100)+((49.7-A[5])/49.7)+((1.165-A[0])/1.165);
+        index_val = index_val*10/3;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         rawFile.write(res_str);
 
@@ -445,8 +453,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                 max_acc = tdnp[4];
             A = A+tdnp;
         A = A/(len(self.AllGoodStrings));
-        index_val = (A[3]/12478)+(A[4]/1110120)+((0.64-A[1])/0.64)+((0.328-A[0])/0.328)+((100-A[8])/100)+((30.36-A[5])/30.36);
-        index_val = index_val*10/6;
+        index_val = ((100-A[8])/100)+((49.7-A[5])/49.7)+((1.165-A[0])/1.165);
+        index_val = index_val*10/3;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         filterFile.write(res_str);
 
@@ -477,8 +485,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                 max_acc = tdnp[4];
             A = A+tdnp;
         A = A/(len(self.RandomStrings));
-        index_val = (A[3]/12478)+(A[4]/1110120)+((0.64-A[1])/0.64)+((0.328-A[0])/0.328)+((100-A[8])/100)+((30.36-A[5])/30.36);
-        index_val = index_val*10/6;
+        index_val = ((100-A[8])/100)+((49.7-A[5])/49.7)+((1.165-A[0])/1.165);
+        index_val = index_val*10/3;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         rand_rawFile.write(res_str);
         self.writeToDatabase(4,A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],max_react,max_move,max_epd,max_vel,max_acc,index_val);
@@ -503,8 +511,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                 max_acc = tdnp[4];
             A = A+tdnp;
         A = A/(len(self.SequenceStrings));
-        index_val = (A[3]/12478)+(A[4]/1110120)+((0.64-A[1])/0.64)+((0.328-A[0])/0.328)+((100-A[8])/100)+((30.36-A[5])/30.36);
-        index_val = index_val*10/6;
+        index_val = ((100-A[8])/100)+((49.7-A[5])/49.7)+((1.165-A[0])/1.165);
+        index_val = index_val*10/3;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         seq_rawFile.write(res_str);
         self.writeToDatabase(3,A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],max_react,max_move,max_epd,max_vel,max_acc,index_val);
@@ -529,8 +537,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                 max_acc = tdnp[4];
             A = A+tdnp;
         A = A/(len(self.RandomGoodStrings));
-        index_val = (A[3]/12478)+(A[4]/1110120)+((0.64-A[1])/0.64)+((0.328-A[0])/0.328)+((100-A[8])/100)+((30.36-A[5])/30.36);
-        index_val = index_val*10/6;
+       index_val = ((100-A[8])/100)+((49.7-A[5])/49.7)+((1.165-A[0])/1.165);
+        index_val = index_val*10/3;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         rand_filterFile.write(res_str);
         self.writeToDatabase(2,A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],max_react,max_move,max_epd,max_vel,max_acc,index_val);
@@ -555,8 +563,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                 max_acc = tdnp[4];
             A = A+tdnp;
         A = A/(len(self.SequenceGoodStrings));
-        index_val = (A[3]/12478)+(A[4]/1110120)+((0.64-A[1])/0.64)+((0.328-A[0])/0.328)+((100-A[8])/100)+((30.36-A[5])/30.36);
-        index_val = index_val*10/6;
+        index_val = ((100-A[8])/100)+((49.7-A[5])/49.7)+((1.165-A[0])/1.165);
+        index_val = index_val*10/3;
         res_str=s_meanReact+str(A[0])+s_meanMove+str(A[1])+s_meanResponse+str(A[2])+s_meanMaxVel+str(A[3])+s_meanMaxAcc+str(A[4])+s_meanEPD+str(A[5])+s_meanRealDist+str(A[6])+s_meanDistTraversed+str(A[7])+s_meanDistPer+str(A[8])+s_maxReact+str(max_react)+s_maxMove+str(max_move)+s_maxEPD+str(max_epd)+s_maxMaxVel+str(max_vel)+s_maxMaxAcc+str(max_acc)+s_score+str(index_val)+"\n";
         seq_filterFile.write(res_str);
         self.writeToDatabase(1,A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],max_react,max_move,max_epd,max_vel,max_acc,index_val);
