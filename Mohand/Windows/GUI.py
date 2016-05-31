@@ -1,10 +1,10 @@
 import sys
 import os
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt4 import QtGui
 from subprocess import Popen, PIPE
 import winsound
 from win32api import GetSystemMetrics
+from collection_GUI_prog import Ui_MainWindow
 
 def dayTitle(x):
     return {
@@ -14,78 +14,24 @@ def dayTitle(x):
         4 : '_Day4_',
         5 : '_Day5_',
         6 : '_Baseline_',
-    }.get(x,'_Performance_')
+        7 : '_Performance_'
+    }.get(x,'_Familiarisation_')
 
-class Form:
-    def window(self):
-        app = QApplication(sys.argv)
-        w = QWidget()
-        record = QPushButton(w)
-        record.setText("Record Tracking Data")
-        record.clicked.connect(self.runCPP)
-        w.setGeometry(50,50,530,480)
-        record.move(20,440)
-
-        quit = QPushButton(w)
-        quit.setText("Quit")
-        quit.clicked.connect(self.quit)
-        quit.move(420,440)
-
-        self.McGillMed = QLabel(w);
-        self.McGillMed.move(275,35);
-        self.McGillMed.setGeometry(275,35,250,60);
-        pixMap1 = QPixmap(os.getcwd() + "/medicine_logo_horiz_eng_outlined_750.png")
-        pixMapScaled1 = pixMap1.scaled(self.McGillMed.size(), Qt.KeepAspectRatio)
-        self.McGillMed.setPixmap(pixMapScaled1)
-
-        self.REPAR = QLabel(w);
-        self.REPAR.move(20,25);
-        self.REPAR.setGeometry(20,25,250,60);
-        pixMap2 = QPixmap(os.getcwd() + "/13552-REPAR-COUL.png")
-        pixMapScaled2 = pixMap2.scaled(self.REPAR.size(), Qt.KeepAspectRatio)
-        self.REPAR.setPixmap(pixMapScaled2)
-
-
-        self.patient_label = QLabel(w)
-        self.patient_label.setText("Enter Subject Number")
-        self.patient_label.move(20,120)
-        self.patient_text = QLineEdit(w)
-        self.patient_text.move(250,120)
-
-        self.day_label = QLabel(w)
-        self.day_label.setText("Enter Day (6 for baseline and 7 for retention)")
-        self.day_label.move(20,170)
-        self.day_text = QLineEdit(w)
-        self.day_text.move(250,170)
-
-        self.block_label = QLabel(w)
-        self.block_label.setText("Enter Block")
-        self.block_label.move(20,220)
-        self.block_text = QLineEdit(w)
-        self.block_text.move(250,220)
-
-        self.Screen_label = QLabel(w)
-        self.Screen_label.setText("Enter Screen Resolution")
-        self.Screen_label.move(20,290)
-
-        self.Horiz_label = QLabel(w)
-        self.Horiz_label.setText("Horizontal")
-        self.Horiz_label.move(20,340)
-        self.Horiz_text = QLineEdit(w)
-        self.Horiz_text.move(90,340)
+class Form(QtGui.QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super(Form,self).__init__()
+        self.setupUi(self);
+        self.record.clicked.connect(self.runCPP);
+        self.clear.clicked.connect(self.clear_data);
+        self.quit.clicked.connect(self.quit_app);
         self.Horiz_text.setText(str(GetSystemMetrics(0)))
-
-        self.Vert_label = QLabel(w)
-        self.Vert_label.setText("Vertical")
-        self.Vert_label.move(300,340)
-        self.Vert_text = QLineEdit(w)
-        self.Vert_text.move(360,340)
         self.Vert_text.setText(str(GetSystemMetrics(1)))
 
-        w.setWindowTitle("Mohand's Task")
-        w.show()
-        sys.exit(app.exec_())
-
+    def clear_data(self):
+        self.patient_text.setText("");
+        self.combo_day.setCurrentIndex(0);
+        self.combo_block.setCurrentIndex(0);
+        
     def ensure_dir(self,f):
         d = os.path.dirname(f)
         print os.path.exists(d)
@@ -93,25 +39,29 @@ class Form:
             os.makedirs(d)
         
     def runCPP(self):
-        subNo = self.patient_text.text()
-        dayNo = self.day_text.text()
-        block = self.block_text.text()
+        subNo = str(self.patient_text.text())
+        dayNo = self.combo_day.currentIndex()+1;
+        block = self.combo_block.currentIndex()
         horiz = self.Horiz_text.text()
         vert = self.Vert_text.text()
-        s1 = 'C:\\Users\\Arna\\Documents\\Arna\\Tracker\\Data\\Subject ' + str(subNo)+'\\';
+        s1 = 'C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject ' + str(subNo)+'\\';
         self.ensure_dir(s1);
-        s = '"C:\\Users\\Arna\\Documents\\Visual Studio 2015\\Projects\\Mohand\'sTracker1\\Debug\\Mohand\'sTracker1.exe" ' + subNo + ' ' + dayNo + ' ' + block +' ' + horiz + ' ' + vert;
+        s = '"C:\\Users\\neuro\\Documents\\Visual Studio 2015\\Projects\\MohandTracker\\Debug\\MohandTracker.exe" ' + subNo + ' ' + str(dayNo) + ' ' + str(block) +' ' + horiz + ' ' + vert;
         p = Popen(str(s), shell=True, stdout=PIPE, stdin=PIPE)
         result = p.stdout.readline().strip()
         print result
         if(result == 'Started'):
             winsound.Beep(2500,400); #Beep(frequency,duration_in_ms)
+        new_block = (1+block)%5;
+        self.combo_block.setCurrentIndex(new_block);
 
-    def quit(self):
+    def quit_app(self):
         exit()
 
 if __name__ == '__main__':
     print "Width = ", GetSystemMetrics(0)
     print "Height = ", GetSystemMetrics(1)
+    app = QtGui.QApplication(sys.argv)
     form = Form()
-    form.window()
+    form.show()
+    sys.exit(app.exec_())
