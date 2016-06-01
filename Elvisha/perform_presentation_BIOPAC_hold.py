@@ -5,46 +5,53 @@ import cv2, sys, os, time, win32api, wx, threading
 from libmpdev import *
 import matplotlib.pyplot as plt
 
-globalDataValues = np.array([]);
-globalTimeValues = np.array([]);
-globalTrialON = np.array([]);
-lastDataValue = -1.4;
-t0 = 0;
-
 class dataThread(threading.Thread):
     def __init__(self, threadID, name):
         threading.Thread.__init__(self);
+        print "dThread start";
         self.threadID = threadID;
         self.name = name;
         self.mp = MP150();
         self.trialON = 0;
         self.exit = 0;
         self.pause = 0;
+        self.no_action = 0;
+        self.connection_closed = 0;
+        self.globalDataValues = np.array([]);
+        self.globalTimeValues = np.array([]);
+        self.globalTrialON = np.array([]);
+        self.lastDataValue = -1.4;
+        self.t0 = 0;
 
     def run(self):
-        global globalDataValues, globalTimeValues, globalTrialON, t0, lastDataValue
         while(1):
+            if self.exit==1:
+                break;
+            if self.no_action==1:
+                continue;
             if self.pause ==1:
                 self.pause = 0;
-                globalDataValues = np.empty(0);
-                globalTimeValues = np.empty(0);
-                globalTrialON = np.empty(0);
-                t0 = time.clock();
+                self.globalDataValues = np.empty(0);
+                self.globalTimeValues = np.empty(0);
+                self.globalTrialON = np.empty(0);
+                self.t0 = time.clock();
             t1 = time.clock();
             samples = self.mp.sample();
             #print len(samples);
-            globalDataValues = np.append(globalDataValues,samples[0]);
-            lastDataValue = globalDataValues[len(globalDataValues)-1];
-            globalTrialON = np.append(globalTrialON,self.trialON);
-            globalTimeValues = np.append(globalTimeValues,(t1-t0));
+            self.globalDataValues = np.append(self.globalDataValues,samples[0]);
+            self.lastDataValue = self.globalDataValues[len(self.globalDataValues)-1];
+            self.globalTrialON = np.append(self.globalTrialON,self.trialON);
+            self.globalTimeValues = np.append(self.globalTimeValues,(t1-self.t0));
             time.sleep(0.02);
-            if self.exit==1:
-                break;
-
+            
+        
     def close(self):
-        self.mp.close();
+        self.exit = 1;
+        if self.connection_closed==0:
+            self.mp.close();
+            self.connection_closed = 1;
 
-class Present_PERFORM:
+class Present_PERFORM_hold:
     app = wx.App(False);
     sizes = [wx.Display(i).GetGeometry().GetSize() for i in range(wx.Display.GetCount())]
     width1 = sizes[1].GetWidth();
@@ -52,8 +59,8 @@ class Present_PERFORM:
     width2 = sizes[0].GetWidth();
     height2 = sizes[0].GetHeight();
 
-    def init(self):
-        self.filename = raw_input("Enter filename to be saved : ");
+    def init(self, fname):
+        self.filename = fname;
         cv2.namedWindow("display");
         cv2.namedWindow("operator");
         self.basImg1 = np.zeros((self.height1,self.width1,3),dtype=np.uint8);
@@ -69,21 +76,21 @@ class Present_PERFORM:
         self.dataValues = np.array([]);
         self.timeValues = np.array([]);
 
-    def gripperInitVal(self):
+    def gripperInitVal(self, dThread):
         for i in range(100):
-            self.gripperVal();
+            self.gripperVal(dThread);
             randomValue = self.val;
             cv2.waitKey(15);
-            self.gripperVal();
+            self.gripperVal(dThread);
         self.init = self.val;
         
-    def gripperVal(self):
-        if len(globalDataValues)>=1:
-            self.val = lastDataValue;
+    def gripperVal(self, dThread):
+        if len(dThread.globalDataValues)>=1:
+            self.val = dThread.lastDataValue;
         else:
             self.val = -1.4;
 
-    def gripperInit(self):
+    def gripperInit(self, dThread):
         init2 = self.basImg1.copy();
         init3 = self.basImg2.copy();
         cv2.putText(init2, "Release the gripper and relax",(int(self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
@@ -94,11 +101,11 @@ class Present_PERFORM:
         while(1):            
             if cv2.waitKey(15)==13:
                 break;
-        self.gripperInitVal();
+        self.gripperInitVal(dThread);
         cv2.imshow("display",self.basImg1);
         cv2.imshow("operator",self.basImg2);
 
-    def getGripperMax(self):
+    def getGripperMax(self, dThread):
         max2 = self.basImg1.copy();
         max3 = self.basImg2.copy();
         cv2.putText(max2, "Get ready to Squeeze as hard as you ",(int(self.width1/10),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
@@ -141,7 +148,7 @@ class Present_PERFORM:
         while(1):
             max2 = maxImg1.copy();
             max3 = maxImg2.copy();
-            self.gripperVal();
+            self.gripperVal(dThread);
             rect_height1 = (self.val-self.init)*(0.8*self.height1)/(self.constMax - self.init);
             rect_height2 = (self.val-self.init)*(0.8*self.height2)/(self.constMax - self.init);
             cv2.rectangle(max2, (int(5*self.width1/11),int(0.9*self.height1-rect_height1)),(int(6*self.width1/11),int(0.9*self.height1)),(255,0,0),-1);
@@ -242,7 +249,7 @@ class Present_PERFORM:
             while(1):
                 task2 = taskImg1.copy();
                 task3 = taskImg2.copy();
-                self.gripperVal();
+                self.gripperVal(dThread);
                 current_pos = (self.val-self.init)*1.0/(self.maxVal - self.init);
                 current_pos_scaled = current_pos*1.0/0.4;
                 if current_pos_scaled<0:
@@ -278,27 +285,25 @@ class Present_PERFORM:
             while((t_1 - t_0)*1000<=jitter_time):
                 t_1 = time.clock();
                 cv2.waitKey(10);
-        dThread.exit = 1;
-        dThread.close();
         folder_name = "data\\"+self.filename+"\\";
         self.ensure_dir(folder_name);
         self.AllDatafilename = folder_name+self.filename+"_allData.txt";
         self.filename = folder_name+self.filename+".txt";
-        for i in range(len(globalDataValues)):
+        for i in range(len(dThread.globalDataValues)):
             if i==0:
                 continue;
-            if globalTrialON[i]==1 and globalTrialON[i-1]==0:
-                t_ref = globalTimeValues[i];
-            if globalTrialON[i]==1:
-                if (globalTimeValues[i]-t_ref)>3.5 and (self.timeValues[len(self.timeValues)-1]>=3.5):
-                    globalTrialON[i]=0;
+            if dThread.globalTrialON[i]==1 and dThread.globalTrialON[i-1]==0:
+                t_ref = dThread.globalTimeValues[i];
+            if dThread.globalTrialON[i]==1:
+                if (dThread.globalTimeValues[i]-t_ref)>3.5 and (self.timeValues[len(self.timeValues)-1]>=3.5):
+                    dThread.globalTrialON[i]=0;
                     continue;
-                self.dataValues = np.append(self.dataValues,globalDataValues[i]);
-                self.timeValues = np.append(self.timeValues,globalTimeValues[i]-t_ref);
+                self.dataValues = np.append(self.dataValues,dThread.globalDataValues[i]);
+                self.timeValues = np.append(self.timeValues,dThread.globalTimeValues[i]-t_ref);
 
         self.dataValues = self.dataValues - self.init;
         np.savetxt(self.filename,np.column_stack((self.dataValues,self.timeValues)),newline='\n');
-        np.savetxt(self.AllDatafilename,np.column_stack((globalDataValues,globalTrialON,globalTimeValues)),newline='\n');
+        np.savetxt(self.AllDatafilename,np.column_stack((dThread.globalDataValues,dThread.globalTrialON,dThread.globalTimeValues)),newline='\n');
             
     def ensure_dir(self,f):
         d = os.path.dirname(f)
@@ -306,8 +311,7 @@ class Present_PERFORM:
         if not os.path.exists(d):
             os.makedirs(d)
 
-    def plotGripperData(self):
-        global globalDataValues, globalTrialON
+    def plotGripperData(self, dThread):
         d = [];
         t = [];
         t1 = [];
@@ -355,11 +359,11 @@ class Present_PERFORM:
         plt.show();
         plt.cla();
         labels = [];
-        print len(globalDataValues), len(globalTrialON), len(globalTimeValues);
-        globalDataValues = globalDataValues - self.init;
-        globalTrialON = globalTrialON*(0.2*(self.maxVal-self.init));
-        labels.append(plt.plot(globalTimeValues,globalDataValues,label="Gripper data"));
-        labels.append(plt.plot(globalTimeValues,globalTrialON,label="Target shown"));
+        print len(dThread.globalDataValues), len(dThread.globalTrialON), len(dThread.globalTimeValues);
+        dThread.globalDataValues = dThread.globalDataValues - self.init;
+        dThread.globalTrialON = dThread.globalTrialON*(0.2*(self.maxVal-self.init));
+        labels.append(plt.plot(dThread.globalTimeValues,dThread.globalDataValues,label="Gripper data"));
+        labels.append(plt.plot(dThread.globalTimeValues,dThread.globalTrialON,label="Target shown"));
         plt.legend(loc='best');
         plt.xlabel('Time');
         plt.ylabel('Analog Value in gripper scale');
@@ -367,22 +371,25 @@ class Present_PERFORM:
                 
     
 if __name__=='__main__':
+    fname = raw_input("Enter filename to be saved : ");
     dThread = dataThread(1,"BIOPAC");
-    obj = Present_PERFORM();
-    obj.init();
+    obj = Present_PERFORM_hold();
+    obj.init(fname);
     #try:
-    t0 = time.clock();
+    dThread.t0 = time.clock();
     dThread.start();
-    obj.gripperInit();
+    obj.gripperInit(dThread);
     print obj.init;
-    obj.getGripperMax();
+    obj.getGripperMax(dThread);
     #print obj.maxVal;
     T_start = time.clock();
     obj.gripperTask(50,dThread);
     T_end = time.clock();
+    dThread.exit = 1;
+    dThread.close();
     print (T_end-T_start);
     cv2.destroyAllWindows();
-    obj.plotGripperData();
+    obj.plotGripperData(dThread);
         
 
     #except:
