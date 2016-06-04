@@ -1,4 +1,5 @@
 import os,sys,math,random
+import numpy as np
 from database_GUI import Ui_MainWindow
 import mysql.connector
 from PyQt4 import QtGui
@@ -39,10 +40,10 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.button_submit.clicked.connect(self.enter);
         self.button_clear.clicked.connect(self.clear);
         self.button_quit.clicked.connect(self.quit);
-
-        self.cnx = mysql.connector.connect(user='root',password='ketchup',database='mohand');
+        self.tdcsArray = np.loadtxt("tdcs_original.txt");
+        self.cnx = mysql.connector.connect(user='root',password='neuro',database='mohand');
         self.cursor = self.cnx.cursor();
-        self.add_str = ("insert into subjectInfo (subNo,subName,age,gender,nativeTongue,hand,occupation,tdcsNo,leisureFreq,week,dayTime) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)");
+        self.add_str = ("insert into subjectInfo (subNo,subName,age,gender,nativeTongue,hand,occupation,tdcsNo,leisureFreq,week,dayTime,sham_tdcs) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)");
 
 
     def clear(self):
@@ -71,7 +72,10 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         subLeisure = str(leisureFreq(self.combo_leisure.currentIndex()));
         subWeek = int(self.text_week.text());
         subTime = str(dayTime(self.combo_time.currentIndex()));
-        val_str = (subNum,subName,subAge,subGender,subLang,subHand,subOcc,subTDCS,subLeisure,subWeek,subTime);
+        shamStr = "Yes";
+        if subTDCS in self.tdcsArray:
+              shamStr = "No";  
+        val_str = (subNum,subName,subAge,subGender,subLang,subHand,subOcc,subTDCS,subLeisure,subWeek,subTime,shamStr);
         comb_str = (self.add_str,val_str);
         #print comb_str;
         self.cursor.execute(self.add_str,val_str);
