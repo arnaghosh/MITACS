@@ -74,10 +74,10 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         count_trial = 1;
         score = 0;
         handle = pywinauto.findwindows.find_windows(title = "Recognition Task GUI")[0];
-        repeatedTargetArray = [2,4,6,8,10];
-        while(count_trial<=10):
+        repeatedTargetArray = [2,5,9,11,14];
+        while(count_trial<=15):
             result = p.stdout.readline().strip()
-            #print result
+            print result
             if(result == 'DONE'):
                 self.showdialog(handle);
                 #print self.optionChosen
@@ -96,6 +96,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         score = score*100.0/(count_trial-1);
         response_str = "Score = "+str(int(score))+'\n';
         recog_file.write(response_str);
+        recog_file.close();
         database_s = "update subjectinfo set recognition_score=" + str(int(score)) + " where subNo="+str(subNo);
         self.cursor.execute(database_s);
         self.cnx.commit();
