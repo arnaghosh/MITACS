@@ -105,7 +105,10 @@ int main(int argc, char** argv) {
 			cin >> temp;
 		}
 		trial++;
+		//cout << trial << endl;
 	}
-	//DatFile << trial << " " << 0 << " " << 0 << " " << 0.0 << endl;
+	//cout << "DONE" << endl;
+	//cin >> temp;
+	cv::destroyAllWindows();
 	return 0;
 }
