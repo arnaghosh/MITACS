@@ -54,8 +54,8 @@ class dataThread(threading.Thread):
 class Present_PERFORM_hold:
     app = wx.App(False);
     sizes = [wx.Display(i).GetGeometry().GetSize() for i in range(wx.Display.GetCount())]
-    width1 = sizes[1].GetWidth();
-    height1 = sizes[1].GetHeight();
+    width1 = sizes[wx.Display.GetCount()-1].GetWidth();
+    height1 = sizes[wx.Display.GetCount()-1].GetHeight();
     width2 = sizes[0].GetWidth();
     height2 = sizes[0].GetHeight();
 
@@ -68,9 +68,10 @@ class Present_PERFORM_hold:
         cv2.imshow("display",self.basImg1);
         cv2.imshow("operator",self.basImg2);
         self.val = 0;
-        self.constMax = 6;
+        self.constMax = 10;
+        self.displayMaxForTask = 30.0 #in percent MVC
         self.constDummyTime = 0;#2; #in seconds = Tr = 2seconds.
-        self.maxVal = -100;
+        self.maxVal = -100; #just put a high negative value as initial value is negative itself.
         self.init = 0;
         #self.mp = MP150();
         self.dataValues = np.array([]);
@@ -165,19 +166,17 @@ class Present_PERFORM_hold:
         cv2.imshow("operator",self.basImg2);
 
     def drawTarget(self,img1,img2,percentTarget):
-        percentTarget_scaled = percentTarget*100/40; #division to scale the full to 40 percent
+        percentTarget_scaled = percentTarget*100/self.displayMaxForTask; 
         height1, width1, ch1 = img1.shape;
         height2, width2, ch2 = img2.shape;
-        H = percentTarget_scaled-1; #change initial value to allow target to rise or appear directly.
-        while(H<=percentTarget_scaled):
-            h1 = H*0.7*height1/100;
-            h2 = H*0.7*height2/100;
-            cv2.rectangle(img1,(int(2*width1/5),int(0.8*height1-h1)),(int(3*width1/5),int(0.8*height1)),(0,0,255),-1);
-            cv2.rectangle(img2,(int(width2/3),int(0.8*height2-h2)),(int(2*width2/3),int(0.8*height2)),(0,0,255),-1);
-            H = H+5;
-            cv2.imshow("display",img1);
-            cv2.imshow("operator",img2);
-            cv2.waitKey(10);
+        H = percentTarget_scaled; #change initial value to allow target to rise or appear directly.
+        h1 = H*0.7*height1/100;
+        h2 = H*0.7*height2/100;
+        cv2.rectangle(img1,(int(2*width1/5),int(0.8*height1-h1)),(int(3*width1/5),int(0.8*height1)),(0,0,255),-1);
+        cv2.rectangle(img2,(int(width2/3),int(0.8*height2-h2)),(int(2*width2/3),int(0.8*height2)),(0,0,255),-1);
+        cv2.imshow("display",img1);
+        cv2.imshow("operator",img2);
+        cv2.waitKey(10);
         
     def gripperTask(self, totalTrials, dThread):
         jitter_time_array = np.loadtxt("data\\Jitter_time.txt");
@@ -197,6 +196,11 @@ class Present_PERFORM_hold:
         dThread.pause = 1;        
         
         while( trialNo<= totalTrials):
+            if trialNo==1:
+                while(1):
+                    if cv2.waitKey(10)==61:
+                        time.sleep(4*self.constDummyTime+0.001);
+                        break;
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy();
             cv2.putText(task2, "READY",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
@@ -231,18 +235,13 @@ class Present_PERFORM_hold:
             while((t1_2 - t0_2)*1000<=500):
                 t1_2 = time.clock();
                 cv2.waitKey(10);
-            if trialNo==1:
-                while(1):
-                    if cv2.waitKey(10)==61:
-                        time.sleep(4*self.constDummyTime+0.001);
-                        break;
             taskImg1 = self.basImg1.copy();
             taskImg2 = self.basImg2.copy();
             cv2.rectangle(taskImg1, (int(2*self.width1/5),int(0.1*self.height1)),(int(3*self.width1/5),int(0.9*self.height1)),(255,255,255),-1);
             cv2.rectangle(taskImg1, (int(2*self.width1/5),int(0.8*self.height1)),(int(3*self.width1/5),int(0.9*self.height1)),(255,0,0),-1);
             cv2.rectangle(taskImg2, (int(self.width2/3),int(0.1*self.height2)),(int(2*self.width2/3),int(0.9*self.height2)),(255,255,255),-1);
             cv2.rectangle(taskImg2, (int(self.width2/3),int(0.8*self.height2)),(int(2*self.width2/3),int(0.9*self.height2)),(255,0,0),-1);
-            percentTarget = 20; #in percentage
+            percentTarget = 15; #in percentage
             self.drawTarget(taskImg1,taskImg2,percentTarget);
             t01 = time.time();
             dThread.trialON = 1;
@@ -251,7 +250,7 @@ class Present_PERFORM_hold:
                 task3 = taskImg2.copy();
                 self.gripperVal(dThread);
                 current_pos = (self.val-self.init)*1.0/(self.maxVal - self.init);
-                current_pos_scaled = current_pos*1.0/0.4;
+                current_pos_scaled = current_pos*100.0/self.displayMaxForTask;
                 if current_pos_scaled<0:
                     current_pos_scaled = 0;
                 if current_pos_scaled >1:
@@ -351,7 +350,7 @@ class Present_PERFORM_hold:
                 t1 = t;
                 t=[t_temp];
                 trialNo = trialNo+1;
-        ref = [0.2*(self.maxVal-self.init)]*len(t1);
+        ref = [0.15*(self.maxVal-self.init)]*len(t1);
         labels.append(plt.plot(t1,ref,label='Target'));
         plt.legend(loc='best');
         plt.xlabel('Time');
@@ -361,7 +360,7 @@ class Present_PERFORM_hold:
         labels = [];
         print len(dThread.globalDataValues), len(dThread.globalTrialON), len(dThread.globalTimeValues);
         dThread.globalDataValues = dThread.globalDataValues - self.init;
-        dThread.globalTrialON = dThread.globalTrialON*(0.2*(self.maxVal-self.init));
+        dThread.globalTrialON = dThread.globalTrialON*(0.15*(self.maxVal-self.init));
         labels.append(plt.plot(dThread.globalTimeValues,dThread.globalDataValues,label="Gripper data"));
         labels.append(plt.plot(dThread.globalTimeValues,dThread.globalTrialON,label="Target shown"));
         plt.legend(loc='best');
@@ -383,7 +382,7 @@ if __name__=='__main__':
     obj.getGripperMax(dThread);
     #print obj.maxVal;
     T_start = time.clock();
-    obj.gripperTask(50,dThread);
+    obj.gripperTask(5,dThread);
     T_end = time.clock();
     dThread.exit = 1;
     dThread.close();
