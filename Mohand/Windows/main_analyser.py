@@ -94,6 +94,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.SequenceGoodStrings.append(topics);
         self.cnx = mysql.connector.connect(user='root',password='neuro',database='mohand');
         self.cursor = self.cnx.cursor();
+        self.smoothLevel = 20;
 
     def addplot(self, fig):
         #plt.savefig('common_labels_text.png', dpi=300)
@@ -158,7 +159,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         for line in self.file:
             iter_val = iter_val+1;
             tr_no, x , y , t = [float(i) for i in line.split()];
-            if iter_val%20>0:
+            if iter_val%self.smoothLevel>0:
                 continue;
             if self.start==0:
                 self.old_x = x;
