@@ -26,27 +26,27 @@ def dayTitle(x):
 
 def center_x(x):
     return {
-        0: 683 * screen_conv_ratio_h,
-        1: 994 * screen_conv_ratio_h,
-        2: 1052 * screen_conv_ratio_h,
-        3: 994 * screen_conv_ratio_h,
-        4: 683 * screen_conv_ratio_h,
-        5: 466 * screen_conv_ratio_h,
-        6: 243 * screen_conv_ratio_h,
-        7: 466 * screen_conv_ratio_h,
-        }.get(x, 683 * screen_conv_ratio_h)
+        0: 683 * screen_conv_ratio_h/4.25,
+        1: 994 * screen_conv_ratio_h/4.25,
+        2: 1052 * screen_conv_ratio_h/4.25,
+        3: 994 * screen_conv_ratio_h/4.25,
+        4: 683 * screen_conv_ratio_h/4.25,
+        5: 466 * screen_conv_ratio_h/4.25,
+        6: 243 * screen_conv_ratio_h/4.25,
+        7: 466 * screen_conv_ratio_h/4.25,
+        }.get(x, 683 * screen_conv_ratio_h/4.25)
 
 def center_y(x):
     return {
-        0: 71 * screen_conv_ratio_h,
-        1: 157 * screen_conv_ratio_h,
-        2: 384 * screen_conv_ratio_h,
-        3: 602 * screen_conv_ratio_h,
-        4: 693 * screen_conv_ratio_h,
-        5: 602 * screen_conv_ratio_h,
-        6: 384 * screen_conv_ratio_h,
-        7: 157 * screen_conv_ratio_h,
-        }.get(x, 384 * screen_conv_ratio_h)
+        0: 71 * screen_conv_ratio_h/4.25,
+        1: 157 * screen_conv_ratio_h/4.25,
+        2: 384 * screen_conv_ratio_h/4.25,
+        3: 602 * screen_conv_ratio_h/4.25,
+        4: 693 * screen_conv_ratio_h/4.25,
+        5: 602 * screen_conv_ratio_h/4.25,
+        6: 384 * screen_conv_ratio_h/4.25,
+        7: 157 * screen_conv_ratio_h/4.25,
+        }.get(x, 384 * screen_conv_ratio_h/4.25)
 
 
 class Main(QtGui.QMainWindow, Ui_MainWindow):
@@ -75,7 +75,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.old_y = 0
         self.old_t = 0
         self.start=0;
-        self.vel_thresh = 500; #in pix/s
+        self.vel_thresh = 500/4.25; #in pix/s
         self.deleteThisRecord = 0;
         self.generateAll = 0;
         self.fileReadDone = 0;
@@ -138,6 +138,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         
         
     def getFig(self):
+        plt.close("all");
         s1 = str(self.tr_no);
         s2 = str(self.tr_no+1);
         self.FromLabel.setText(s1);
@@ -153,10 +154,12 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         if int(self.tr_no)<len(self.center_array):
             present_target = (self.center_array[int(self.tr_no)][int(self.center_no)])%9;
         #print self.tr_no, present_target;
+        iter_val = 0;
         for line in self.file:
+            iter_val = iter_val+1;
             tr_no, x , y , t = [float(i) for i in line.split()];
-            
-            
+            if iter_val%20>0:
+                continue;
             if self.start==0:
                 self.old_x = x;
                 self.old_y = y;
@@ -207,7 +210,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                     a1.plot(self.X[0],self.Y[0],'g+', mew=1.5, ms=15)
                     a1.plot(center_x(present_target),center_y(present_target),'ro', markerfacecolor='None', mew= 1, ms = 15)
                     a1.plot(center_x(present_target),center_y(present_target),'r.')
-                    a1.axis([0,self.horiz,0,self.verti])
+                    a1.axis([0,self.horiz/4.25,0,self.verti/4.25])
                 
                     a2 = fig.add_subplot(222)
                     a2.plot(self.T[1:len(self.T)],self.D);
