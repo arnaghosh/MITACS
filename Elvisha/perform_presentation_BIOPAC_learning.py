@@ -56,8 +56,8 @@ class dataThread(threading.Thread):
 class Present_PERFORM_learn:
     app = wx.App(False);
     sizes = [wx.Display(i).GetGeometry().GetSize() for i in range(wx.Display.GetCount())]
-    width1 = sizes[1].GetWidth();
-    height1 = sizes[1].GetHeight();
+    width1 = sizes[wx.Display.GetCount()-1].GetWidth();
+    height1 = sizes[wx.Display.GetCount()-1].GetHeight();
     width2 = sizes[0].GetWidth();
     height2 = sizes[0].GetHeight();
 
@@ -206,6 +206,11 @@ class Present_PERFORM_learn:
         
         while( trialNo<= totalTrials):
             time_in_red = 0;
+            if trialNo==1:
+                while(1):
+                    if cv2.waitKey(10)==61:
+                        time.sleep(4*self.constDummyTime+0.001);
+                        break;
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy();
             cv2.putText(task2, "READY",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
@@ -240,11 +245,6 @@ class Present_PERFORM_learn:
             while((t1_2 - t0_2)*1000<=500):
                 t1_2 = time.clock();
                 cv2.waitKey(10);
-            if trialNo==1:
-                while(1):
-                    if cv2.waitKey(10)==61:
-                        time.sleep(4*self.constDummyTime+0.001);
-                        break;
             taskImg1 = targetImg1.copy();
             taskImg2 = targetImg2.copy();
             prev_x1 = 0.099*self.width1;
