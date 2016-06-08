@@ -1,5 +1,5 @@
 from PyQt4.uic import loadUiType
-import sys, math, random
+import sys, math, random, os
 from PyQt4 import QtGui
 import numpy as np
 from win32api import GetSystemMetrics
@@ -375,6 +375,12 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
                     indexVal = (float(old_indexVal*(self.blockNo-1))+indexVal)/self.blockNo;
             s ="update "+day_str+" set meanReactionTime"+entry_str+"="+str(meanReactionTime)+",meanMovementTime"+entry_str+"="+str(meanMovementTime)+",meanResponseTime"+entry_str+"="+str(meanResponseTime)+",meanMaxVel"+entry_str+"="+str(meanMaxVel)+",meanMaxAcc"+entry_str+"="+str(meanMaxAcc)+",meanEPD"+entry_str+"="+str(meanEPD)+",meanRealDist"+entry_str+"="+str(meanRealDist)+",meanTraversedDist"+entry_str+"="+str(meanTraversedDist)+",meanPerDev"+entry_str+"="+str(meanPerDev)+",ovMaxReactionTime"+entry_str+"="+str(ovMaxReactionTime)+",ovMaxMovementTime"+entry_str+"="+str(ovMaxMovementTime)+",ovMaxEPD"+entry_str+"="+str(ovMaxEPD)+",ovMaxSpeed"+entry_str+"="+str(ovMaxSpeed)+",ovMaxAcc"+entry_str+"="+str(ovMaxAcc)+",indexVal"+entry_str+"="+str(indexVal)+" where subNo="+str(self.subjectNo);
             self.cursor.execute(s);
+            
+    def ensure_dir(self,f):
+        d = os.path.dirname(f)
+        print os.path.exists(d)
+        if not os.path.exists(d):
+            os.makedirs(d)
 
     def generateRecord(self):
         self.writeToFilteredFile();
@@ -382,13 +388,14 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         while self.fileReadDone==0:
             self.getFig();
             self.writeToFilteredFile();
-            
-        raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileAll.txt";
-        filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileAll.txt";
-        rand_raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRandom.txt";
-        seq_raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRepeated.txt";
-        rand_filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRandom.txt";
-        seq_filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRepeated.txt";
+        folder_s = "Data\\Subject "+str(self.subjectNo)+"\\Summary\\";
+        self.ensure_dir(folder_s);
+        raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Summary\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileAll.txt";
+        filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Summary\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileAll.txt";
+        rand_raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Summary\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRandom.txt";
+        seq_raw_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Summary\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_RawFileRepeated.txt";
+        rand_filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Summary\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRandom.txt";
+        seq_filter_s = "C:\\Users\\neuro\\Documents\\Arna\\Tracker\\Data\\Subject "+str(self.subjectNo)+"\\Summary\\Subject" + str(self.subjectNo) + dayTitle(self.dayNo) + "Block" + str(self.blockNo) + "_FilteredFileRepeated.txt";
         rawFile = open(raw_s,'w');
         rand_rawFile = open(rand_raw_s, 'w');
         seq_rawFile = open(seq_raw_s, 'w');
