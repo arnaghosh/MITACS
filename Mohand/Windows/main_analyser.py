@@ -60,12 +60,6 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.QuitButton.clicked.connect(self.quit)
         self.horiz = GetSystemMetrics(0)
         self.verti = GetSystemMetrics(1)
-        self.X=[];
-        self.Y=[];
-        self.D=[];
-        self.V=[];
-        self.A=[];
-        self.T=[];
         self.subjectNo = 0;
         self.dayNo = 0;
         self.blockNo = 0;
@@ -112,6 +106,12 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
 
     def loadFile(self):
         print "load file"
+        self.X=[];
+        self.Y=[];
+        self.D=[];
+        self.V=[];
+        self.A=[];
+        self.T=[];
         self.generateAll = 0;
         self.fileReadDone = 0;
         subNo = self.SubjectText.text()
@@ -134,6 +134,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.center_array_size = len(self.center_array[0]);
         self.tr_no = 0;
         self.start = 0;
+        self.smoothLevel = int(self.text_smooth.text());
         self.getFig();
         
         
