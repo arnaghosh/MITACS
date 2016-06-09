@@ -2,9 +2,11 @@
 
 import numpy as np
 import cv2, sys, os, time, win32api, wx, threading, win32gui
-import win32ui, win32con, re
+import win32ui, win32con, re, pywinauto, win32com.client
 from libmpdev import *
 import matplotlib.pyplot as plt
+#from psychopy import core
+#from ctypes import windll
 
 #these functions and variables are to write keystrokes to the Spike window
 whndl=None;
@@ -20,6 +22,8 @@ def find_window_callback(hwnd, param):
     if re.match(wildcard,str(win32gui.GetWindowText(hwnd)))!=None:
         whndl = hwnd;
 #this is where the functions end.
+
+mutex = threading.Lock();
 
 class dataThread(threading.Thread):
     def __init__(self, threadID, name):
@@ -41,6 +45,7 @@ class dataThread(threading.Thread):
 
     def run(self):
         while(1):
+            mutex.acquire();
             if self.exit==1:
                 break;
             if self.no_action==1:
@@ -59,6 +64,8 @@ class dataThread(threading.Thread):
             self.globalTrialON = np.append(self.globalTrialON,self.trialON);
             self.globalTimeValues = np.append(self.globalTimeValues,(t1-self.t0));
             time.sleep(0.02);
+            mutex.release();
+        print "dThread closing";
             
         
     def close(self):
@@ -74,23 +81,47 @@ class triggerThread(threading.Thread):
         self.threadID = threadID;
         self.name = name;
         self.trigger = 0;
-        self.portAddress=0x0D00 ;
-        win32gui.EnumWindows(find_window_callback,".*Notepad.*");
+        self.portAddress = 0xD050;
+        win32gui.EnumWindows(find_window_callback,".*Spike2 -.*");
         self.whndl = whndl;
         print self.whndl
-        #self.whndl = win32gui.FindWindowEx(0,0,None, 'Untitled - Notepad');
-        self.hwnds = {};
-        win32gui.EnumChildWindows(self.whndl,callback,self.hwnds)
-        self.whndl = self.hwnds['Edit']
-        self.wnd = win32ui.CreateWindowFromHandle(self.whndl);
+        title = str(win32gui.GetWindowText(self.whndl));
+        print title
+        #self.whndl = win32gui.FindWindowEx(0,0,None, title);
+        #self.hwnds = {};
+        #win32gui.EnumChildWindows(self.whndl,callback,self.hwnds)
+        #print self.hwnds;
+        #self.whndl = self.hwnds['AfxWnd110u']
+        #self.wnd = win32ui.CreateWindowFromHandle(self.whndl);
+        self.app = pywinauto.application.Application();
+        self.win = self.app.window_(handle=self.whndl);
+        self.shell = win32com.client.Dispatch("WScript.Shell")
         
     
     def run(self):
         while(1):
+            mutex.acquire();
+            if self.trigger==-1:
+                break;
             if self.trigger!=0:
-                self.wnd.SendMessage(win32con.WM_CHAR, ord(str(self.trigger)),0); #send keypress here.-> self.trigger value
-                #write to parallel port here. -> self.trigger value.
+                #self.wnd.SendMessage(win32con.WM_CHAR, ord(str(self.trigger)),0); #send keypress here.-> self.trigger value
+                if self.whndl!=win32gui.GetForegroundWindow():
+                    self.win.Minimize()
+                    self.win.Restore();
+                    self.win.SetFocus();
+                if self.trigger==1:
+                    self.shell.SendKeys("1")
+                if self.trigger==2:
+                    self.shell.SendKeys("2")
+                windll.inpout32.Out32(self.portAddress, self.trigger)
+                core.wait(0.001)
+                windll.inpout32.Out32(self.portAddress, 0)#write to parallel port here. -> self.trigger value.
                 self.trigger = 0;
+            mutex.release();
+        print "trThread closing";
+
+    def close(self):
+        self.trigger = -1;
 
 class Present_PERFORM_hold:
     app = wx.App(False);
@@ -127,10 +158,12 @@ class Present_PERFORM_hold:
         self.init = self.val;
         
     def gripperVal(self, dThread):
+        mutex.acquire();
         if len(dThread.globalDataValues)>=1:
             self.val = dThread.lastDataValue;
         else:
             self.val = -1.4;
+        mutex.release();
 
     def gripperInit(self, dThread):
         init2 = self.basImg1.copy();
@@ -234,7 +267,12 @@ class Present_PERFORM_hold:
                 break;
         
         trialNo = 1;
-        dThread.pause = 1;        
+        mutex.acquire();
+        dThread.pause = 1;
+        trThread.win.Minimize()
+        trThread.win.Restore();
+        trThread.win.SetFocus();
+        mutex.release();
         
         while( trialNo<= totalTrials):
             task2 = self.basImg1.copy();
@@ -285,8 +323,10 @@ class Present_PERFORM_hold:
             percentTarget = 15; #in percentage
             self.drawTarget(taskImg1,taskImg2,percentTarget);
             t01 = time.time();
+            mutex.acquire();
             trThread.trigger = 1;
             dThread.trialON = 1;
+            mutex.release();
             while(1):
                 task2 = taskImg1.copy();
                 task3 = taskImg2.copy();
@@ -311,8 +351,10 @@ class Present_PERFORM_hold:
                 t11 = time.time();
                 if (t11-t01)> 3.5:
                     break;
+            mutex.acquire();
             trThread.trigger = 2;
             dThread.trialON = 0;
+            mutex.release();
             s = "Trial "+str(trialNo)+" done.";
             jitter_time = jitter_time_array[trialNo-1];
             trialNo = trialNo + 1;
@@ -331,6 +373,7 @@ class Present_PERFORM_hold:
         self.ensure_dir(folder_name);
         self.AllDatafilename = folder_name+self.filename+"_allData.txt";
         self.filename = folder_name+self.filename+".txt";
+        mutex.acquire();
         for i in range(len(dThread.globalDataValues)):
             if i==0:
                 continue;
@@ -346,6 +389,7 @@ class Present_PERFORM_hold:
         self.dataValues = self.dataValues - self.init;
         np.savetxt(self.filename,np.column_stack((self.dataValues,self.timeValues)),newline='\n');
         np.savetxt(self.AllDatafilename,np.column_stack((dThread.globalDataValues,dThread.globalTrialON,dThread.globalTimeValues)),newline='\n');
+        mutex.release();
             
     def ensure_dir(self,f):
         d = os.path.dirname(f)
@@ -414,14 +458,17 @@ class Present_PERFORM_hold:
     
 if __name__=='__main__':
     fname = raw_input("Enter filename to be saved : ");
-    dThread = dataThread(1,"BIOPAC");
     trThread = triggerThread(2,"Trigger");
+    dThread = dataThread(1,"BIOPAC");
+    
     obj = Present_PERFORM_hold();
     obj.init(fname);
     #try:
+    mutex.acquire();
     dThread.t0 = time.clock();
     dThread.start();
     trThread.start();
+    mutex.release();
     obj.gripperInit(dThread);
     print obj.init;
     obj.getGripperMax(dThread);
@@ -429,12 +476,18 @@ if __name__=='__main__':
     T_start = time.clock();
     obj.gripperTask(5,dThread,trThread);
     T_end = time.clock();
-    dThread.exit = 1;
-    dThread.close();
+    mutex.acquire();
+    while dThread.exit!=1:
+        dThread.exit = 1;
+        dThread.close();
+    while trThread.trigger!=-1:
+        trThread.trigger = -1;
+        trThread.close();
+    mutex.release();
     print (T_end-T_start);
     cv2.destroyAllWindows();
     obj.plotGripperData(dThread);
-        
+    os._exit(0);
 
     #except:
         #print ValueError;
