@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1924</width>
+    <height>1063</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Plot Generator</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="label_subNo">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>60</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Subject Number</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_subNo">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>60</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>3</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_filter">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>60</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Filtered Data</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="combo_filter">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>60</y>
+      <width>69</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Yes</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>No</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_param">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>90</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Parameter</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="combo_param">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>90</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Index Value</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean Reaction Time</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean Movement Time</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean Response Time</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean Max Velocity</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean Max Acceleration</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean End Point Deviation</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean Real Distance</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean Distance Travelled</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>mean Percentage Deviation</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>overall Max Reaction Time</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>overall Max Movement Time</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>overall Max End Point Deviation</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>overall Max Speed</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>overall Max Acceleration</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QWidget" name="widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>1471</width>
+      <height>801</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="mplvl"/>
+   </widget>
+   <widget class="QPushButton" name="PlotButton">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>960</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Plot</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ClearButton">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>960</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clear</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="QuitButton">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>960</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quit</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="logo1">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>141</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>13552-REPAR-COUL.png</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="logo2">
+    <property name="geometry">
+     <rect>
+      <x>1660</x>
+      <y>10</y>
+      <width>231</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>medicine_logo_horiz_eng_outlined_750.png</pixmap>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="SaveButton">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>960</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save Plot</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ImprovementLabel">
+    <property name="geometry">
+     <rect>
+      <x>1540</x>
+      <y>130</y>
+      <width>371</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>MS PMincho</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Improvement in parameter from baseline in %</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rep_info">
+    <property name="geometry">
+     <rect>
+      <x>1620</x>
+      <y>200</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Repeated Sequence</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ran_info">
+    <property name="geometry">
+     <rect>
+      <x>1790</x>
+      <y>200</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Random Sequence</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="d1">
+    <property name="geometry">
+     <rect>
+      <x>1510</x>
+      <y>240</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Day 1</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="d2">
+    <property name="geometry">
+     <rect>
+      <x>1510</x>
+      <y>280</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Day 2</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="d1_3">
+    <property name="geometry">
+     <rect>
+      <x>1510</x>
+      <y>320</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Day 3</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="d1_4">
+    <property name="geometry">
+     <rect>
+      <x>1510</x>
+      <y>360</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Day 4</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="d1_5">
+    <property name="geometry">
+     <rect>
+      <x>1510</x>
+      <y>400</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Day 5</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="d1_6">
+    <property name="geometry">
+     <rect>
+      <x>1510</x>
+      <y>440</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Performance</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rep_d1">
+    <property name="geometry">
+     <rect>
+      <x>1640</x>
+      <y>240</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ran_d1">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>240</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rep_d2">
+    <property name="geometry">
+     <rect>
+      <x>1640</x>
+      <y>280</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ran_d2">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>280</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ran_d3">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>320</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rep_d3">
+    <property name="geometry">
+     <rect>
+      <x>1640</x>
+      <y>320</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ran_d4">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>360</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rep_d4">
+    <property name="geometry">
+     <rect>
+      <x>1640</x>
+      <y>360</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ran_d5">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>400</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rep_d5">
+    <property name="geometry">
+     <rect>
+      <x>1640</x>
+      <y>400</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ran_p">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>440</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rep_p">
+    <property name="geometry">
+     <rect>
+      <x>1640</x>
+      <y>440</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="sub_info">
+    <property name="geometry">
+     <rect>
+      <x>1640</x>
+      <y>160</y>
+      <width>161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>(Subject Number)</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1924</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
