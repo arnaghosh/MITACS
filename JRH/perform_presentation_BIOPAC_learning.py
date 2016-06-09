@@ -3,9 +3,29 @@
 # The max height of target should be 0.9*height from bottom and the targets end 0.1*width from right.
 # Each target is 0.08*width and error margin is 50 pixels
 import numpy as np
-import cv2, sys, os, time, win32api, wx, threading
+import cv2, sys, os, time, win32api, wx, threading, win32gui
+import win32ui, win32con, re, pywinauto, win32com.client
 from libmpdev import *
 import matplotlib.pyplot as plt
+#from psychopy import core
+#from ctypes import windll
+
+#these functions and variables are to write keystrokes to the Spike window
+whndl=None;
+def callback(hwnd,hwnds):
+    if win32gui.IsWindowVisible(hwnd) and win32gui.IsWindowEnabled(hwnd):
+        hwnds[win32gui.GetClassName(hwnd)] = hwnd
+    return True
+
+def find_window_callback(hwnd, param):
+    global whndl
+    wildcard = param;
+    #wndl = params[1];
+    if re.match(wildcard,str(win32gui.GetWindowText(hwnd)))!=None:
+        whndl = hwnd;
+#this is where the functions end.
+
+mutex = threading.Lock();
 
 class dataThread(threading.Thread):
     def __init__(self, threadID, name):
@@ -27,6 +47,7 @@ class dataThread(threading.Thread):
 
     def run(self):
         while(1):
+            mutex.acquire();
             if self.exit==1:
                 break;
             if self.no_action==1:
@@ -45,6 +66,8 @@ class dataThread(threading.Thread):
             self.globalTrialON = np.append(self.globalTrialON,self.trialON);
             self.globalTimeValues = np.append(self.globalTimeValues,(t1-self.t0));
             time.sleep(0.02);
+            mutex.release();
+        print "dThread closing";
             
         
     def close(self):
@@ -52,6 +75,55 @@ class dataThread(threading.Thread):
         if self.connection_closed==0:
             self.mp.close();
             self.connection_closed = 1;
+
+class triggerThread(threading.Thread):
+    def __init__(self,threadID,name):
+        threading.Thread.__init__(self);
+        print "trThread start";
+        self.threadID = threadID;
+        self.name = name;
+        self.trigger = 0;
+        self.portAddress = 0xD050;
+        win32gui.EnumWindows(find_window_callback,".*Notepad.*");  #".*Spike2 -.*"
+        self.whndl = whndl;
+        print self.whndl
+        title = str(win32gui.GetWindowText(self.whndl));
+        print title
+        #self.whndl = win32gui.FindWindowEx(0,0,None, title);
+        #self.hwnds = {};
+        #win32gui.EnumChildWindows(self.whndl,callback,self.hwnds)
+        #print self.hwnds;
+        #self.whndl = self.hwnds['AfxWnd110u']
+        #self.wnd = win32ui.CreateWindowFromHandle(self.whndl);
+        self.app = pywinauto.application.Application();
+        self.win = self.app.window_(handle=self.whndl);
+        self.shell = win32com.client.Dispatch("WScript.Shell")
+        
+    
+    def run(self):
+        while(1):
+            mutex.acquire();
+            if self.trigger==-1:
+                break;
+            if self.trigger!=0:
+                #self.wnd.SendMessage(win32con.WM_CHAR, ord(str(self.trigger)),0); #send keypress here.-> self.trigger value
+                if self.whndl!=win32gui.GetForegroundWindow():
+                    self.win.Minimize()
+                    self.win.Restore();
+                    self.win.SetFocus();
+                if self.trigger==1:
+                    self.shell.SendKeys("1")
+                if self.trigger==2:
+                    self.shell.SendKeys("2")
+                #windll.inpout32.Out32(self.portAddress, self.trigger)
+                #core.wait(0.001)
+                #windll.inpout32.Out32(self.portAddress, 0)#write to parallel port here. -> self.trigger value.
+                self.trigger = 0;
+            mutex.release();
+        print "trThread closing";
+
+    def close(self):
+        self.trigger = -1;
 
 class Present_PERFORM_learn:
     app = wx.App(False);
@@ -64,8 +136,10 @@ class Present_PERFORM_learn:
     def init(self, fname):
         self.filename = fname;
         self.filename = self.filename+"_learning";
-        self.targetSequenceFile = "data\\target_sequence.txt";
+        self.scoreFile = self.filename+"_score";
+        self.targetSequenceFile = "data\\CarlaTargetSequences.txt";
         self.target_sequence = np.loadtxt(self.targetSequenceFile);
+        self.numOfTargets = len(self.target_sequence)-1;
         cv2.namedWindow("display");
         cv2.namedWindow("operator");
         self.basImg1 = np.zeros((self.height1,self.width1,3),dtype=np.uint8);
@@ -73,14 +147,18 @@ class Present_PERFORM_learn:
         cv2.imshow("display",self.basImg1);
         cv2.imshow("operator",self.basImg2);
         self.val = 0;
-        self.constMax = 6;
+        self.constMax = 10;
+        self.constMaxTarget = 20.0; #percent of MVC
+        self.displayMaxForTask = 20.0 #in percent MVC
         self.constDummyTime = 0;#2; #in seconds = Tr = 2seconds.
+        self.feedback = 1; #1 - Yes, 2- No
         self.maxVal = -100;
         self.init = 0;
         #self.mp = MP150();
         self.dataValues = np.array([]);
         self.timeValues = np.array([]);
         self.refValues = np.array([]);
+        self.score_array = np.array([]);
 
     def gripperInitVal(self, dThread):
         for i in range(100):
@@ -91,10 +169,12 @@ class Present_PERFORM_learn:
         self.init = self.val;
 
     def gripperVal(self, dThread):
+        mutex.acquire();
         if len(dThread.globalDataValues)>=1:
             self.val = dThread.lastDataValue;
         else:
             self.val = -1.4;
+        mutex.release();
 
     def gripperInit(self, dThread):
         init2 = self.basImg1.copy();
@@ -173,24 +253,27 @@ class Present_PERFORM_learn:
     def drawTarget(self,img1,img2):        
         height1, width1, ch1 = img1.shape;
         height2, width2, ch2 = img2.shape;
+        #print "height1= ",height1, self.height1;
         for i in range(len(self.target_sequence)):
-            H = self.target_sequence[i]*100.0/40.0;
-            h1 = H*0.8*height1/100;
-            e1 = 50; #2*(100.0/40.0)*0.8*height1/100;
-            h2 = H*0.8*height2/100;
-            e2 = 50; #2*(100.0/40.0)*0.8*height2/100;
-            cv2.rectangle(img1,(int((0.1+0.08*i)*width1),int(0.9*height1-h1-e1)),(int((0.18+0.08*i)*width1),int(0.9*height1-h1+e1)),(0,0,255),-1);
-            cv2.rectangle(img2,(int((0.1+0.08*i)*width2),int(0.9*height2-h2-e2)),(int((0.18+0.08*i)*width2),int(0.9*height2-h2+e2)),(0,0,255),-1);
+            if i==0:
+                continue;
+            H = self.target_sequence[i]*self.constMaxTarget*100.0/self.displayMaxForTask;
+            h1 = H*0.5*height1/100;
+            e1 = 25; #2*(100.0/40.0)*0.8*height1/100;
+            h2 = H*0.5*height2/100;
+            e2 = 25; #2*(100.0/40.0)*0.8*height2/100;
+            cv2.rectangle(img1,(int((0.1+(0.8*(i-1)/self.numOfTargets))*width1),int(0.6*height1-h1-e1)),(int((0.1+(0.8*(i)/self.numOfTargets))*width1),int(0.6*height1-h1+e1)),(0,0,255),-1);
+            cv2.rectangle(img2,(int((0.1+(0.8*(i-1)/self.numOfTargets))*width2),int(0.6*height2-h2-e2)),(int((0.1+(0.8*(i)/self.numOfTargets))*width2),int(0.6*height2-h2+e2)),(0,0,255),-1);
         #cv2.imshow("display",img1);
         #cv2.imshow("operator",img2);
         #cv2.waitKey(10);
 
-    def gripperTask(self, totalTrials, trialTime, dThread):         #trialTime in seconds
+    def gripperTask(self, totalTrials, trialTime, dThread, trThread):         #trialTime in seconds
         jitter_time_array = np.loadtxt("data\\Jitter_time.txt");
+        self.basImg1 = np.full((self.height1,self.width1,3),0,dtype=np.uint8);
+        self.basImg2 = np.full((self.height2,self.width2,3),0,dtype=np.uint8);
         task2 = self.basImg1.copy();
         task3 = self.basImg2.copy();
-        targetImg1 = self.basImg1.copy();
-        targetImg2 = self.basImg2.copy();
         cv2.putText(task2, "Follow the Red Targets by ",(int(self.width1/10),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
         cv2.putText(task2, "squeezing the gripper",(int(self.width1/4),int(self.height1/2)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
         cv2.putText(task3, "Press Enter when ready",(int(self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
@@ -200,16 +283,25 @@ class Present_PERFORM_learn:
         while(1):
             if cv2.waitKey(30)==13:
                 break;
+        cv2.rectangle(self.basImg1,(int(0.05*self.width1),int(0.05*self.height1)),(int(0.9*self.width1),int(0.7*self.height1)),(255,255,255),-1);
+        cv2.rectangle(self.basImg2,(int(0.05*self.width2),int(0.05*self.height2)),(int(0.9*self.width2),int(0.7*self.height2)),(255,255,255),-1);
+        targetImg1 = self.basImg1.copy();
+        targetImg2 = self.basImg2.copy();
         self.drawTarget(targetImg1,targetImg2);
         trialNo = 1;
-        dThread.pause = 1;        
-        
+        print "starting trials"
+        mutex.acquire();
+        dThread.pause = 1;
+        trThread.win.Minimize()
+        trThread.win.Restore();
+        trThread.win.SetFocus();
+        mutex.release();
         while( trialNo<= totalTrials):
             time_in_red = 0;
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy();
-            cv2.putText(task2, "READY",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
-            cv2.putText(task3, "READY",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+            cv2.putText(task2, "READY",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(0,255,0),3);
+            cv2.putText(task3, "READY",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(0,255,0),3);
             cv2.imshow("display",task2);
             cv2.imshow("operator",task3);
             t0_2 = time.clock();
@@ -219,8 +311,8 @@ class Present_PERFORM_learn:
                 cv2.waitKey(10);
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy();    
-            cv2.putText(task2, "SET",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
-            cv2.putText(task3, "SET",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+            cv2.putText(task2, "SET",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(0,255,0),3);
+            cv2.putText(task3, "SET",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(0,255,0),3);
             cv2.imshow("display",task2);
             cv2.imshow("operator",task3);
             t0_2 = time.clock();
@@ -230,8 +322,8 @@ class Present_PERFORM_learn:
                 cv2.waitKey(10);
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy(); 
-            cv2.putText(task2, "GO",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
-            cv2.putText(task3, "GO",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+            cv2.putText(task2, "GO",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(0,255,0),3);
+            cv2.putText(task3, "GO",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(0,255,0),3);
             cv2.imshow("display",task2);
             cv2.imshow("operator",task3);
             t03 = time.time();
@@ -240,38 +332,72 @@ class Present_PERFORM_learn:
             while((t1_2 - t0_2)*1000<=500):
                 t1_2 = time.clock();
                 cv2.waitKey(10);
-            if trialNo==1:
-                while(1):
-                    if cv2.waitKey(10)==61:
-                        time.sleep(4*self.constDummyTime+0.001);
-                        break;
+            #if trialNo==1:
+                #while(1):
+                    #if cv2.waitKey(10)==61:
+                        #time.sleep(4*self.constDummyTime+0.001);
+                        #break;
             taskImg1 = targetImg1.copy();
             taskImg2 = targetImg2.copy();
-            prev_x1 = 0.099*self.width1;
-            prev_x2 = 0.099*self.width2;
-            prev_y1 = 0.9*self.height1;
-            prev_y2 = 0.9*self.height2;
+            cv2.imshow("display",taskImg1);
+            cv2.imshow("operator",taskImg2);
+            cv2.waitKey(1000);
+            prev_x1 = 0.05*self.width1;
+            prev_x2 = 0.05*self.width2;
+            prev_y1 = 0.6*self.height1;
+            prev_y2 = 0.6*self.height2;
             #time_calibrated = 0;
             inc_x1 = 0.001*self.width1;
             inc_x2 = 0.001*self.width2;
             #first_exec_time_duration = 0;
             t01 = time.clock();
             t_old = t01;
+            t_adjustment = -1;
+            mutex.acquire();
+            trThread.trigger = 1;
+            mutex.release();
             while(1):
-                target_number = int((t_old-t01)*10/trialTime);
-                dThread.trialON = self.target_sequence[target_number];
+                if (prev_x1>=0.1*self.width1) and (t_adjustment<0):
+                    print "adjustment over";
+                    t_adjustment = (time.clock()-t01);
+                    target_number = 1;
+                if prev_x1>=0.1*self.width1:
+                    target_number = 1+int((time.clock()-t01-t_adjustment)*12/(trialTime+0.001));
+                    #target_number = 1+int((prev_x1 - 0.1*self.width1)*12/(0.8*self.width1+1));
+                    #print target_number;
+                else:
+                    target_number = 0;
+
+                if target_number>self.numOfTargets:
+                    target_number = self.numOfTargets;
+                #mutex.acquire();
+                dThread.trialON = self.target_sequence[target_number]*self.constMaxTarget;
+                #mutex.release();
                 self.gripperVal(dThread);
                 current_pos = (self.val-self.init)*1.0/(self.maxVal - self.init);
-                current_pos_scaled = current_pos*1.0/0.4;
+                current_pos_scaled = current_pos*100/self.displayMaxForTask;
                 if current_pos_scaled<0:
                     current_pos_scaled = 0;
                 if current_pos_scaled >1.125:
                     current_pos_scaled = 1.125;
                     
-                present_y1 = 0.9*self.height1-(current_pos_scaled*(0.8*self.height1));
-                present_y2 = 0.9*self.height2-(current_pos_scaled*(0.8*self.height2));
+                present_y1 = 0.6*self.height1-(current_pos_scaled*(0.5*self.height1));
+                present_y2 = 0.6*self.height2-(current_pos_scaled*(0.5*self.height2));
                 present_x1 = prev_x1 + inc_x1;
                 present_x2 = prev_x2 + inc_x2;
+                if cv2.waitKey(1)==27:
+                    trialNo = totalTrials+1;
+                    break;
+                t11 = time.clock();
+                if (t11-t01)> trialTime+t_adjustment:
+                    break;
+                inc_x1 = (0.9*self.width1-present_x1)*(t11-t_old)/(trialTime+t_adjustment - t11+t01);
+                inc_x2 = (0.9*self.width2-present_x2)*(t11-t_old)/(trialTime+t_adjustment - t11+t01);
+                t11 = time.clock();
+                #if abs((current_pos*100)-self.target_sequence[target_number])<=2:
+                if (target_number!=0) and abs(present_y1 - (0.6*self.height1-(self.target_sequence[target_number]*self.constMaxTarget*0.5*self.height1/self.displayMaxForTask)))<=25:
+                    time_in_red = time_in_red+(t11- t_old);            
+                t_old = time.clock();
                 cv2.line(taskImg1, (int(prev_x1),int(prev_y1)),(int(present_x1),int(present_y1)),(255,0,0),2);
                 cv2.line(taskImg2, (int(prev_x2),int(prev_y2)),(int(present_x2),int(present_y2)),(255,0,0),2);
                 cv2.imshow("display",taskImg1);
@@ -280,28 +406,22 @@ class Present_PERFORM_learn:
                 prev_y1 = present_y1;
                 prev_x2 = present_x2;
                 prev_y2 = present_y2;
-                if cv2.waitKey(1)==27:
-                    trialNo = totalTrials+1;
-                    break;
-                t11 = time.clock();
-                if (t11-t01)> trialTime:
-                    break;
-                inc_x1 = (0.9*self.width1-present_x1)*(t11-t_old)/(trialTime - t11+t01);
-                inc_x2 = (0.9*self.width2-present_x2)*(t11-t_old)/(trialTime - t11+t01);
-                if abs((current_pos*100)-self.target_sequence[target_number])<=2:
-                    time_in_red = time_in_red+(t11- t_old);
-                t_old = time.clock();
+            mutex.acquire();
+            trThread.trigger = 2;
             dThread.trialON = 0;
+            mutex.release();
             s = "Trial "+str(trialNo)+" done.";
-            score = time_in_red*100.0/trialTime;
+            score = time_in_red*100.0/(trialTime);
             s1 = " Score = " + str(int(score));
+            self.score_array = np.append(self.score_array,score);
             s = s+s1;
-            jitter_time = jitter_time_array[trialNo-1];
+            jitter_time = 2000; #jitter_time_array[trialNo-1];
             trialNo = trialNo + 1;
             task2 = self.basImg1.copy();
             task3 = self.basImg2.copy();
-            cv2.putText(task2, s1,(int(self.width1/3),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
-            cv2.putText(task3, s,(int(self.width2/8),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+            if self.feedback==1:
+                cv2.putText(task2, s1,(int(self.width1/3),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,4,(0,0,0),3);
+            cv2.putText(task3, s,(int(self.width2/8),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(0,0,0),3);
             cv2.imshow("display",task2);
             cv2.imshow("operator",task3);
             t_0 = time.clock();
@@ -313,6 +433,10 @@ class Present_PERFORM_learn:
         self.ensure_dir(folder_name);
         self.AllDatafilename = folder_name+self.filename+"_allData.txt";
         self.filename = folder_name+self.filename+".txt";
+        self.scoreFile = folder_name+self.scoreFile +".txt";
+        index = np.arange(1,totalTrials+1);
+        np.savetxt(self.scoreFile,np.column_stack((index,self.score_array)));
+        mutex.acquire();
         print len(self.dataValues), len(self.refValues), len(self.timeValues);
         for i in range(len(dThread.globalDataValues)):
             if i==0:
@@ -331,6 +455,7 @@ class Present_PERFORM_learn:
         self.dataValues = self.dataValues - self.init;
         np.savetxt(self.filename,np.column_stack((self.dataValues,self.refValues,self.timeValues)),newline='\n');
         np.savetxt(self.AllDatafilename,np.column_stack((dThread.globalDataValues,dThread.globalTrialON,dThread.globalTimeValues)),newline='\n');
+        mutex.release();
 
     def ensure_dir(self,f):
         d = os.path.dirname(f)
@@ -408,28 +533,38 @@ class Present_PERFORM_learn:
     
 if __name__=='__main__':
     fname = raw_input("Enter filename to be saved : ");
-    NumOfTrials = 20;
+    NumOfTrials = 2;
     trialTime = 10; #in seconds.
     dThread = dataThread(1,"BIOPAC");
+    trThread = triggerThread(2,"Trigger");
     obj = Present_PERFORM_learn();
     obj.init(fname);
     #try:
+    mutex.acquire();
     dThread.t0 = time.clock();
     dThread.start();
+    trThread.start();
+    mutex.release();
     obj.gripperInit(dThread);
     print obj.init;
     obj.getGripperMax(dThread);
     #print obj.maxVal;
     T_start = time.clock();
-    obj.gripperTask(NumOfTrials,trialTime, dThread);
+    obj.gripperTask(NumOfTrials,trialTime, dThread, trThread);
     T_end = time.clock();
-    dThread.exit = 1;
-    dThread.close();
+    mutex.acquire();
+    while dThread.exit!=1:
+        dThread.exit = 1;
+        dThread.close();
+    while trThread.trigger!=-1:
+        trThread.trigger = -1;
+        trThread.close();
+    mutex.release();
+    time.sleep(0.01);
     print (T_end-T_start);
     cv2.destroyAllWindows();
     obj.plotGripperData(dThread,trialTime);
-        
-
+    os._exit(0);
     #except:
         #print ValueError;
         #cv2.destroyAllWindows();
