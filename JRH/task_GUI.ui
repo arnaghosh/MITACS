@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>944</width>
+    <height>507</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>MS Reference Sans Serif</family>
+    <pointsize>10</pointsize>
+    <weight>75</weight>
+    <bold>true</bold>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="logo1">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>20</y>
+      <width>281</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>medicine_logo_horiz_eng_outlined_750.png</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="subjectName">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>60</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Subject Name</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="trials">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>250</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Trials</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="subName">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>60</y>
+      <width>171</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="totalTrials">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>240</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="getMax">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>350</y>
+      <width>251</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Get Max Voluntary Contraction</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hold">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>350</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Hold Task</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="learn">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>350</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Motor Learning Task</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="quit">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>350</y>
+      <width>81</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quit</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_trialTime">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>240</y>
+      <width>171</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Trial Time (in seconds)</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="trialTime">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>240</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="LearningParam">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>180</y>
+      <width>301</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Learning Task Parameters :</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_fb">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>290</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Feedback</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="combo_fb">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>290</y>
+      <width>69</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <item>
+     <property name="text">
+      <string>No</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Yes</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_init">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Gripper Initial Value</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_max">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>110</y>
+      <width>261</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Max Voluntary Contraction Value</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_init">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>120</y>
+      <width>231</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_max">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>120</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>944</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
