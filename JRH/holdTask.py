@@ -22,14 +22,18 @@ def find_window_callback(hwnd, param):
 #this is where the functions end.
 
 mutex = threading.Lock();
-
 class dataThread(threading.Thread):
     def __init__(self, threadID, name):
         threading.Thread.__init__(self);
         print "dThread start";
         self.threadID = threadID;
         self.name = name;
-        self.mp = MP150();
+        DAQmxResetDevice('dev1');
+        self.taskhandle = TaskHandle();
+        DAQmxCreateTask("",byref(self.taskhandle));
+        DAQmxCreateAIVoltageChan(self.taskhandle,"Dev1/ai0","",DAQmx_Val_Cfg_Default, -10,10,DAQmx_Val_Volts,None);
+        DAQmxCfgSampClkTiming(self.taskhandle,"",50,DAQmx_Val_Rising, DAQmx_Val_ContSamps,10)
+        #self.mp = MP150();
         self.trialON = 0;
         self.exit = 0;
         self.pause = 0;
@@ -42,11 +46,14 @@ class dataThread(threading.Thread):
         self.t0 = 0;
 
     def run(self):
+        DAQmxStartTask(self.taskhandle);
         while(1):
+            reads = int32()
+            temp = np.zeros((1),dtype=np.float64);
+            t1= time.clock();
+            DAQmxReadAnalogF64(self.taskhandle,1,10,DAQmx_Val_GroupByChannel,temp,1000,byref(reads),None);
             mutex.acquire();
-            if self.exit==1:
-                mutex.release();
-                break;
+            #print temp
             if self.no_action==1:
                 continue;
             if self.pause ==1:
@@ -56,22 +63,26 @@ class dataThread(threading.Thread):
                 self.globalTrialON = np.empty(0);
                 self.t0 = time.clock();
             t1 = time.clock();
-            samples = self.mp.sample();
+            #samples = self.mp.sample();
             #print len(samples);
-            self.globalDataValues = np.append(self.globalDataValues,samples[0]);
+            self.globalDataValues = np.append(self.globalDataValues,temp[len(temp)-1]);  #samples[0]
             self.lastDataValue = self.globalDataValues[len(self.globalDataValues)-1];
             self.globalTrialON = np.append(self.globalTrialON,self.trialON);
             self.globalTimeValues = np.append(self.globalTimeValues,(t1-self.t0));
-            time.sleep(0.02);
+            #time.sleep(0.02);
             mutex.release();
+            if self.exit==1:
+                break;
         print "dThread closing";
             
         
     def close(self):
         self.exit = 1;
         if self.connection_closed==0:
-            self.mp.close();
+            if self.taskhandle:
+                DAQmxClearTask(self.taskhandle);
             self.connection_closed = 1;
+            #self.mp.close();
 
 class triggerThread(threading.Thread):
     def __init__(self,threadID,name):
@@ -81,7 +92,7 @@ class triggerThread(threading.Thread):
         self.name = name;
         self.trigger = 0;
         self.portAddress = 0xD050;
-        win32gui.EnumWindows(find_window_callback,".*Notepad.*"); #Spike2 -
+        win32gui.EnumWindows(find_window_callback,".*Spike2 -.*"); #Spike2 -
         self.whndl = whndl;
         print self.whndl
         title = str(win32gui.GetWindowText(self.whndl));
@@ -96,34 +107,32 @@ class triggerThread(threading.Thread):
         self.win = self.app.window_(handle=self.whndl);
         self.shell = win32com.client.Dispatch("WScript.Shell")
         
-    
     def run(self):
         while(1):
             mutex.acquire();
             tr_value = self.trigger;
+            mutex.release();
             if tr_value==-1:
-                mutex.release();
                 break;
             if tr_value!=0:
+                windll.inpout32.Out32(self.portAddress, tr_value)
+                core.wait(0.001)
+                windll.inpout32.Out32(self.portAddress, 0)#write to parallel port here. -> self.trigger value.
                 #self.wnd.SendMessage(win32con.WM_CHAR, ord(str(self.trigger)),0); #send keypress here.-> self.trigger value
                 if self.whndl!=win32gui.GetForegroundWindow():
                     self.win.Minimize()
                     self.win.Restore();
                     self.win.SetFocus();
-                if tr_value==1:
-                    self.shell.SendKeys("1")
-                if tr_value==2:
-                    self.shell.SendKeys("2")
-                #windll.inpout32.Out32(self.portAddress, tr_value)
-                #core.wait(0.001)
-                #windll.inpout32.Out32(self.portAddress, 0)#write to parallel port here. -> self.trigger value.
+                self.shell.SendKeys(""+str(tr_value));
+                mutex.acquire();
                 self.trigger = 0;
-            mutex.release();
+                mutex.release();
             time.sleep(0.001);
         print "trThread closing";
 
     def close(self):
         self.trigger = -1;
+
 
 class holdTask:
     app = wx.App(False);
@@ -350,14 +359,18 @@ class holdTask:
                 cv2.imshow("operator",task3);
                 if cv2.waitKey(10)==27:
                     trialNo = totalTrials+1;
+                    mutex.acquire();
+                    trThread.trigger = 2;
+                    dThread.trialON = 0;
+                    mutex.release();
                     break;
                 t11 = time.time();
                 if (t11-t01)> 3.5:
+                    mutex.acquire();
+                    trThread.trigger = 2;
+                    dThread.trialON = 0;
+                    mutex.release();
                     break;
-            mutex.acquire();
-            trThread.trigger = 2;
-            dThread.trialON = 0;
-            mutex.release();
             s = "Trial "+str(trialNo)+" done.";
             jitter_time = jitter_time_array[trialNo-1];
             trialNo = trialNo + 1;
