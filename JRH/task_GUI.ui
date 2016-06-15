@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>944</width>
-    <height>507</height>
+    <width>1025</width>
+    <height>626</height>
    </rect>
   </property>
   <property name="font">
@@ -22,27 +22,11 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="logo1">
-    <property name="geometry">
-     <rect>
-      <x>540</x>
-      <y>20</y>
-      <width>281</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap>medicine_logo_horiz_eng_outlined_750.png</pixmap>
-    </property>
-   </widget>
    <widget class="QLabel" name="subjectName">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>60</y>
+      <x>300</x>
+      <y>50</y>
       <width>121</width>
       <height>31</height>
      </rect>
@@ -60,10 +44,10 @@
    <widget class="QLabel" name="trials">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>250</y>
-      <width>71</width>
-      <height>21</height>
+      <x>31</x>
+      <y>240</y>
+      <width>39</width>
+      <height>16</height>
      </rect>
     </property>
     <property name="text">
@@ -73,8 +57,8 @@
    <widget class="QLineEdit" name="subName">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>60</y>
+      <x>460</x>
+      <y>50</y>
       <width>171</width>
       <height>31</height>
      </rect>
@@ -83,18 +67,21 @@
    <widget class="QLineEdit" name="totalTrials">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>80</x>
       <y>240</y>
-      <width>161</width>
-      <height>31</height>
+      <width>81</width>
+      <height>22</height>
      </rect>
+    </property>
+    <property name="text">
+     <string>20</string>
     </property>
    </widget>
    <widget class="QPushButton" name="getMax">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>350</y>
+      <x>160</x>
+      <y>480</y>
       <width>251</width>
       <height>41</height>
      </rect>
@@ -106,21 +93,21 @@
    <widget class="QPushButton" name="hold">
     <property name="geometry">
      <rect>
-      <x>350</x>
-      <y>350</y>
-      <width>121</width>
+      <x>450</x>
+      <y>480</y>
+      <width>131</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Hold Task</string>
+     <string>Matching Task</string>
     </property>
    </widget>
    <widget class="QPushButton" name="learn">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>350</y>
+      <x>630</x>
+      <y>480</y>
       <width>161</width>
       <height>41</height>
      </rect>
@@ -132,8 +119,8 @@
    <widget class="QPushButton" name="quit">
     <property name="geometry">
      <rect>
-      <x>750</x>
-      <y>350</y>
+      <x>860</x>
+      <y>480</y>
       <width>81</width>
       <height>41</height>
      </rect>
@@ -145,10 +132,10 @@
    <widget class="QLabel" name="label_trialTime">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>249</x>
       <y>240</y>
-      <width>171</width>
-      <height>31</height>
+      <width>172</width>
+      <height>16</height>
      </rect>
     </property>
     <property name="text">
@@ -158,11 +145,14 @@
    <widget class="QLineEdit" name="trialTime">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>430</x>
       <y>240</y>
-      <width>121</width>
-      <height>31</height>
+      <width>91</width>
+      <height>22</height>
      </rect>
+    </property>
+    <property name="text">
+     <string>9</string>
     </property>
    </widget>
    <widget class="QLabel" name="LearningParam">
@@ -181,9 +171,9 @@
    <widget class="QLabel" name="label_fb">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>290</y>
-      <width>81</width>
+      <x>173</x>
+      <y>301</y>
+      <width>71</width>
       <height>21</height>
      </rect>
     </property>
@@ -194,9 +184,9 @@
    <widget class="QComboBox" name="combo_fb">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>290</y>
-      <width>69</width>
+      <x>270</x>
+      <y>301</y>
+      <width>52</width>
       <height>22</height>
      </rect>
     </property>
@@ -217,8 +207,8 @@
    <widget class="QLabel" name="label_init">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>120</y>
+      <x>60</x>
+      <y>110</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -230,8 +220,8 @@
    <widget class="QLabel" name="label_max">
     <property name="geometry">
      <rect>
-      <x>450</x>
-      <y>110</y>
+      <x>500</x>
+      <y>100</y>
       <width>261</width>
       <height>41</height>
      </rect>
@@ -243,8 +233,8 @@
    <widget class="QLineEdit" name="text_init">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>120</y>
+      <x>230</x>
+      <y>110</y>
       <width>231</width>
       <height>21</height>
      </rect>
@@ -253,11 +243,181 @@
    <widget class="QLineEdit" name="text_max">
     <property name="geometry">
      <rect>
-      <x>720</x>
-      <y>120</y>
+      <x>770</x>
+      <y>110</y>
       <width>211</width>
       <height>21</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>240</y>
+      <width>39</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Block</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="combo_block">
+    <property name="geometry">
+     <rect>
+      <x>645</x>
+      <y>240</y>
+      <width>238</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Familiarization</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>4</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>5</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Retention with no Feedback</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Retention with Feedback</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_scoreThresh">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>301</y>
+      <width>223</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Score Threshold for feedback</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_scoreThresh">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>301</y>
+      <width>71</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>30</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="loadMax">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>530</y>
+      <width>261</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load Max Voluntary Contraction</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="isometric">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>530</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Isometric Task</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="logo1">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>10</y>
+      <width>251</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>medicine_logo_horiz_eng_outlined_750.png</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="isometricParam">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>359</y>
+      <width>241</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Isometric Task Parameters :</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="trialTime_2">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>410</y>
+      <width>172</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Trial Time (in seconds)</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_isoTrialTime">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>410</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>120</string>
     </property>
    </widget>
   </widget>
@@ -266,7 +426,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>944</width>
+     <width>1025</width>
      <height>21</height>
     </rect>
    </property>

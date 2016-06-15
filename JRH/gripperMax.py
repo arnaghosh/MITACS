@@ -187,7 +187,7 @@ class gripperMax:
         cv2.imshow("display",self.basImg1);
         cv2.imshow("operator",self.basImg2);
 
-    def getGripperMax(self, dThread):
+    def getGripperMax(self, dThread, fname):
         max2 = self.basImg1.copy();
         max3 = self.basImg2.copy();
         cv2.putText(max2, "Get ready to Squeeze as hard as you ",(int(self.width1/10),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
@@ -245,10 +245,22 @@ class gripperMax:
                 break;
         cv2.imshow("display",self.basImg1);
         cv2.imshow("operator",self.basImg2);
+        folder_name = "data\\"+fname+"\\";
+        self.ensure_dir(folder_name);
+        self.filename = folder_name+fname+"_maxContrac.txt";
+        f = open(self.filename, 'w')
+        f.write(str(self.maxVal-self.init));
+
+    def ensure_dir(self,f):
+        d = os.path.dirname(f)
+        print os.path.exists(d)
+        if not os.path.exists(d):
+            os.makedirs(d)        
 
 if __name__=='__main__':
     dThread = dataThread(1,"BIOPAC");
     trThread = triggerThread(2,"Trigger");
+    fname = raw_input("Enter filename to be saved : ");
     obj = gripperMax();
     obj.init();
     mutex.acquire();
@@ -258,7 +270,7 @@ if __name__=='__main__':
     mutex.release();
     obj.gripperInit(dThread);
     print obj.init;
-    obj.getGripperMax(dThread);
+    obj.getGripperMax(dThread, fname);
     mutex.acquire();
     print obj.init, obj.maxVal;
     dThread.exit = 1;
