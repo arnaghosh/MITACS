@@ -137,10 +137,10 @@ class triggerThread(threading.Thread):
 class motorLearningTask:
     app = wx.App(False);
     sizes = [wx.Display(i).GetGeometry().GetSize() for i in range(wx.Display.GetCount())]
-    width1 = sizes[wx.Display.GetCount()-1].GetWidth();
-    height1 = sizes[wx.Display.GetCount()-1].GetHeight();
-    width2 = sizes[0].GetWidth()/2;
-    height2 = sizes[0].GetHeight()/2;
+    width1 = sizes[0].GetWidth();
+    height1 = sizes[0].GetHeight();
+    width2 = sizes[wx.Display.GetCount()-1].GetWidth()/2;
+    height2 = sizes[wx.Display.GetCount()-1].GetHeight()/2;
     t_tr0 = 0;
 
     def init(self, fname):
@@ -409,7 +409,7 @@ class motorLearningTask:
                 present_x1 = prev_x1 + inc_x1;
                 present_x2 = prev_x2 + inc_x2;
                 if cv2.waitKey(1)==27:
-                    trialNo = totalTrials+1;
+                    score = score_thresh+1;
                     mutex.acquire();
                     trThread.trigger = 2;
                     dThread.trialON = 0;
