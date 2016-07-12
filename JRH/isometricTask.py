@@ -137,13 +137,14 @@ class triggerThread(threading.Thread):
 class isometricTask:
     app = wx.App(False);
     sizes = [wx.Display(i).GetGeometry().GetSize() for i in range(wx.Display.GetCount())]
-    width1 = sizes[wx.Display.GetCount()-1].GetWidth();
-    height1 = sizes[wx.Display.GetCount()-1].GetHeight();
-    width2 = sizes[0].GetWidth()/2;
-    height2 = sizes[0].GetHeight()/2;
+    width1 = sizes[0].GetWidth();
+    height1 = sizes[0].GetHeight();
+    width2 = sizes[wx.Display.GetCount()-1].GetWidth()/2;
+    height2 = sizes[wx.Display.GetCount()-1].GetHeight()/2;
 
-    def init(self, fname):
+    def init(self, fname, timeAfterExercise):
         self.filename = fname;
+        self.timeAfterExercise = timeAfterExercise;
         cv2.namedWindow("display");
         cv2.namedWindow("operator");
         self.basImg1 = np.zeros((self.height1,self.width1,3),dtype=np.uint8);
@@ -385,7 +386,7 @@ class isometricTask:
             cv2.waitKey(10);
         folder_name = "data\\"+self.filename+"\\";
         self.ensure_dir(folder_name);
-        self.AllDatafilename = folder_name+self.filename+"_isometricData.txt";
+        self.AllDatafilename = folder_name+self.filename+"_"+self.timeAfterExercise+"_isometric.txt";
         mutex.acquire();
         np.savetxt(self.AllDatafilename,np.column_stack((dThread.globalDataValues,dThread.globalTrialON,dThread.globalTimeValues)),newline='\n');
         mutex.release();
