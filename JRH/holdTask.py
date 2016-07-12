@@ -137,10 +137,10 @@ class triggerThread(threading.Thread):
 class holdTask:
     app = wx.App(False);
     sizes = [wx.Display(i).GetGeometry().GetSize() for i in range(wx.Display.GetCount())]
-    width1 = sizes[wx.Display.GetCount()-1].GetWidth();
-    height1 = sizes[wx.Display.GetCount()-1].GetHeight();
-    width2 = sizes[0].GetWidth()/2;
-    height2 = sizes[0].GetHeight()/2;
+    width1 = sizes[0].GetWidth();
+    height1 = sizes[0].GetHeight();
+    width2 = sizes[wx.Display.GetCount()-1].GetWidth()/2;
+    height2 = sizes[wx.Display.GetCount()-1].GetHeight()/2;
 
     def init(self, fname, timeAfterExercise):
         self.filename = fname;
