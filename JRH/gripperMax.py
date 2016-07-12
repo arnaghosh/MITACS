@@ -137,13 +137,12 @@ class triggerThread(threading.Thread):
 class gripperMax:
     app = wx.App(False);
     sizes = [wx.Display(i).GetGeometry().GetSize() for i in range(wx.Display.GetCount())]
-    width1 = sizes[wx.Display.GetCount()-1].GetWidth();
-    height1 = sizes[wx.Display.GetCount()-1].GetHeight();
-    width2 = sizes[0].GetWidth()/2;
-    height2 = sizes[0].GetHeight()/2;
+    width1 = sizes[0].GetWidth();
+    height1 = sizes[0].GetHeight();
+    width2 = sizes[wx.Display.GetCount()-1].GetWidth()/2;
+    height2 = sizes[wx.Display.GetCount()-1].GetHeight()/2;
 
     def init(self):
-        
         cv2.namedWindow("display");
         cv2.namedWindow("operator");
         self.basImg1 = np.zeros((self.height1,self.width1,3),dtype=np.uint8);
@@ -195,19 +194,6 @@ class gripperMax:
         folder_name = "data\\"+fname+"\\";
         self.ensure_dir(folder_name);
         self.filename = folder_name+fname+"_maxContrac.txt";
-        if os.path.isFile(self.filename):
-            msg = QtGui.QMessageBox()
-            msg.setIcon(QtGui.QMessageBox.Question)
-            msg.setFixedSize(250, 100); 
-            msg.move((GetSystemMetrics(0))/2,(GetSystemMetrics(1))/2);
-            msg.setText("Do you want to overwrite?")
-            msg.setInformativeText("Do you want to overwrite "+self.filename+" ?")
-            msg.setWindowTitle("MessageBox demo")
-            msg.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-            msg.buttonClicked.connect(self.msgbtn)
-            retval = msg.exec_()
-            if self.optionChosen = "No":
-                return;
         f = open(self.filename, 'w')
         max2 = self.basImg1.copy();
         max3 = self.basImg2.copy();
