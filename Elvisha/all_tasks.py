@@ -2,6 +2,7 @@ from gripperMax import gripperMax
 from holdTask import holdTask
 from isometricTask import isometricTask
 from motorLearningTask import motorLearningTask
+from cross import cross
 from task_GUI_prog import Ui_MainWindow
 from PyQt4 import QtGui
 import numpy as np
@@ -75,14 +76,16 @@ class Form(QtGui.QMainWindow, Ui_MainWindow):
         self.hold.clicked.connect(self.startHoldTask);
         self.learn.clicked.connect(self.startLearnTask);
         self.isometric.clicked.connect(self.startIsometricTask);
+        self.presentCross.clicked.connect(self.presentationCross);
         self.quit.clicked.connect(self.quit_app);
 
     def timeAfterExercise_str(self,x):
         return {
-            0 : 'preExercise' ,
-            1 : '30min',
-            2 : '60min',
-            3 : '90min',
+            0 : 'Familiarization' ,
+            1 : 'preExercise' ,
+            2 : '30min',
+            3 : '60min',
+            4 : '90min',
         }.get(x,'120min')
 
     def msgbtn(self,i):
@@ -99,6 +102,12 @@ class Form(QtGui.QMainWindow, Ui_MainWindow):
         msg.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
         msg.buttonClicked.connect(self.msgbtn)
         retval = msg.exec_()
+
+    def presentationCross(self):
+        self.obj = cross();
+        self.obj.init();
+        self.obj.drawCross();
+        cv2.destroyAllWindows();
     
     def getMaxContrac(self):
         subname = self.subName.text();
@@ -152,9 +161,11 @@ class Form(QtGui.QMainWindow, Ui_MainWindow):
         
     def startHoldTask(self):
         subname = self.subName.text();
+        tAE = self.combo_holdTime.currentIndex();
         tAfterExer = self.timeAfterExercise_str(self.combo_holdTime.currentIndex());
+        familTrials = int(self.text_trialFamil.text());
         checkFile = "data\\"+subname+"\\"+subname+"_"+tAfterExer+".txt";
-        if os.path.isfile(checkFile):
+        if tAE!=0 and os.path.isfile(checkFile):
             self.overwriteMessage(checkFile);
             if self.optionChosen == "&No":
                 return;
@@ -171,7 +182,10 @@ class Form(QtGui.QMainWindow, Ui_MainWindow):
         self.obj.init = float(self.text_init.text());
         self.obj.maxVal = float(self.text_max.text());
         T_start = time.clock();        
-        self.obj.gripperTask(50,dThread);
+        if tAE!=0:
+            self.obj.gripperTask(50,dThread);
+        else:
+            self.obj.familiarization(familTrials,dThread);
         T_end = time.clock();
         print (T_end-T_start);
         cv2.destroyAllWindows();
@@ -179,7 +193,8 @@ class Form(QtGui.QMainWindow, Ui_MainWindow):
         dThread.exit = -1;
         dThread.close();
         mutex.release();
-        self.obj.plotGripperData(dThread);
+        if (tAE!=0):
+            self.obj.plotGripperData(dThread);
 
     def startIsometricTask(self):
         subname = self.subName.text();
