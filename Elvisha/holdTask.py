@@ -362,6 +362,125 @@ class holdTask:
         np.savetxt(self.filename,np.column_stack((self.dataValues,self.timeValues)),newline='\n');
         np.savetxt(self.AllDatafilename,np.column_stack((dThread.globalDataValues,dThread.globalTrialON,dThread.globalTimeValues)),newline='\n');
         mutex.release();
+
+    def familiarization(self, totalTrials, dThread):
+        t_overhead_start = time.clock();
+        jitter_time_array = np.loadtxt("data\\Jitter_time.txt");
+        task1 = self.basImg11.copy();
+        task2 = self.basImg1.copy();
+        task3 = self.basImg2.copy();
+        cv2.putText(task1, "Squeeze to reach the ",(int(self.width11/8),int(self.height11/4)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),2);
+        cv2.putText(task1, "red target bar and",(int(self.width11/6),int(self.height11/2)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),2);
+        cv2.putText(task1, "hold for 3 seconds",(int(self.width11/6),int(3*self.height11/4)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),2);
+        task2[int((self.height1-self.height11)/2):int((self.height1+self.height11)/2),int((self.width1-self.width11)/2):int((self.width1+self.width11)/2)] = task1;
+        cv2.putText(task3, "Press Enter when ready",(int(self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+        cv2.imshow("display",task2);
+        cv2.waitKey(2000);
+        cv2.imshow("operator",task3);
+        while(1):
+            if cv2.waitKey(30)==13:
+                break;
+        
+        trialNo = 1;
+        mutex.acquire();
+        dThread.pause = 1;
+        mutex.release();
+        
+        while( trialNo<= totalTrials):
+            task2 = self.basImg1.copy();
+            task3 = self.basImg2.copy();
+            #cv2.putText(task2, "READY",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
+            cv2.putText(task3, "READY",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+            cv2.imshow("display",task2);
+            cv2.imshow("operator",task3);
+            t0_2 = time.clock();
+            t1_2 = time.clock();
+            while((t1_2 - t0_2)<=1):
+                t1_2 = time.clock();
+                cv2.waitKey(10);
+            task2 = self.basImg1.copy();
+            task3 = self.basImg2.copy();    
+            #cv2.putText(task2, "SET",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
+            cv2.putText(task3, "SET",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+            cv2.imshow("display",task2);
+            cv2.imshow("operator",task3);
+            t0_2 = time.clock();
+            t1_2 = time.clock();
+            while((t1_2 - t0_2)<=1):
+                t1_2 = time.clock();
+                cv2.waitKey(10);
+            task2 = self.basImg1.copy();
+            task3 = self.basImg2.copy(); 
+            #cv2.putText(task2, "GO",(int(2*self.width1/5),int(self.height1/3)),cv2.FONT_HERSHEY_PLAIN,6,(255,255,255),3);
+            cv2.putText(task3, "GO",(int(2*self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+            cv2.imshow("display",task2);
+            cv2.imshow("operator",task3);
+            t03 = time.time();
+            t0_2 = time.clock();
+            t1_2 = time.clock();
+            while((t1_2 - t0_2)*1000<=500):
+                t1_2 = time.clock();
+                cv2.waitKey(10);
+            taskImg1 = self.basImg1.copy();
+            taskImg11 = taskImg1[int((self.height1-self.height11)/2):int((self.height1+self.height11)/2),int((self.width1-self.width11)/2):int((self.width1+self.width11)/2)];
+            taskImg2 = self.basImg2.copy();
+            cv2.rectangle(taskImg11, (int(2*self.width11/5),int(0.1*self.height11)),(int(3*self.width11/5),int(0.9*self.height11)),(255,255,255),-1);
+            cv2.rectangle(taskImg11, (int(2*self.width11/5),int(0.8*self.height11)),(int(3*self.width11/5),int(0.9*self.height11)),(255,0,0),-1);
+            taskImg1[int((self.height1-self.height11)/2):int((self.height1+self.height11)/2),int((self.width1-self.width11)/2):int((self.width1+self.width11)/2)] = taskImg11;
+            cv2.rectangle(taskImg2, (int(self.width2/3),int(0.1*self.height2)),(int(2*self.width2/3),int(0.9*self.height2)),(255,255,255),-1);
+            cv2.rectangle(taskImg2, (int(self.width2/3),int(0.8*self.height2)),(int(2*self.width2/3),int(0.9*self.height2)),(255,0,0),-1);
+            percentTarget = self.constTarget; #in percentage
+            self.drawTarget(taskImg1,taskImg2,percentTarget);
+            t01 = time.time();
+            mutex.acquire();
+            dThread.trialON = 1;
+            mutex.release();
+            while(1):
+                task2 = taskImg1.copy();
+                task3 = taskImg2.copy();
+                self.gripperVal(dThread);
+                current_pos = (self.val-self.init)*1.0/(self.maxVal - self.init);
+                current_pos_scaled = current_pos*100.0/self.displayMaxForTask;
+                if current_pos_scaled<0:
+                    current_pos_scaled = 0;
+                if current_pos_scaled >1:
+                    current_pos_scaled = 1;
+                    
+                rect_height1 = current_pos_scaled*(0.7*self.height11);
+                rect_height2 = current_pos_scaled*(0.7*self.height2);
+                #print rect_height1, rect_height2;
+                task1 = task2[int((self.height1-self.height11)/2):int((self.height1+self.height11)/2),int((self.width1-self.width11)/2):int((self.width1+self.width11)/2)];
+                cv2.rectangle(task1, (int(5*self.width11/11),int(0.8*self.height11-rect_height1)),(int(6*self.width11/11),int(0.8*self.height11)),(255,0,0),-1);
+                task2[int((self.height1-self.height11)/2):int((self.height1+self.height11)/2),int((self.width1-self.width11)/2):int((self.width1+self.width11)/2)] = task1;
+                cv2.rectangle(task3, (int(4*self.width2/9),int(0.8*self.height2-rect_height2)),(int(5*self.width2/9),int(0.8*self.height2)),(255,0,0),-1);
+                cv2.imshow("display",task2);
+                cv2.imshow("operator",task3);
+                if cv2.waitKey(10)==27:
+                    trialNo = totalTrials+1;
+                    mutex.acquire();
+                    dThread.trialON = 0;
+                    mutex.release();
+                    break;
+                t11 = time.time();
+                if (t11-t01)> 3.5:
+                    mutex.acquire();
+                    dThread.trialON = 0;
+                    mutex.release();
+                    break;
+            s = "Trial "+str(trialNo)+" done.";
+            jitter_time = jitter_time_array[trialNo-1];
+            trialNo = trialNo + 1;
+            task2 = self.basImg1.copy();
+            task3 = self.basImg2.copy();            
+            
+            cv2.putText(task3, s,(int(self.width2/5),int(self.height2/3)),cv2.FONT_HERSHEY_PLAIN,4,(255,255,255),3);
+            cv2.imshow("display",task2);
+            cv2.imshow("operator",task3);
+            t_0 = time.clock();
+            t_1 = time.clock();
+            while((t_1 - t_0)*1000<=jitter_time):
+                t_1 = time.clock();
+                cv2.waitKey(10);
             
     def ensure_dir(self,f):
         d = os.path.dirname(f)
