@@ -93,7 +93,7 @@
    <widget class="QPushButton" name="hold">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>630</x>
       <y>480</y>
       <width>131</width>
       <height>41</height>
@@ -106,8 +106,8 @@
    <widget class="QPushButton" name="learn">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>480</y>
+      <x>450</x>
+      <y>530</y>
       <width>161</width>
       <height>41</height>
      </rect>
@@ -119,8 +119,8 @@
    <widget class="QPushButton" name="quit">
     <property name="geometry">
      <rect>
-      <x>860</x>
-      <y>480</y>
+      <x>820</x>
+      <y>500</y>
       <width>81</width>
       <height>41</height>
      </rect>
@@ -342,7 +342,7 @@
    <widget class="QPushButton" name="loadMax">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>160</x>
       <y>530</y>
       <width>261</width>
       <height>41</height>
@@ -355,7 +355,7 @@
    <widget class="QPushButton" name="isometric">
     <property name="geometry">
      <rect>
-      <x>570</x>
+      <x>630</x>
       <y>530</y>
       <width>161</width>
       <height>41</height>
@@ -423,7 +423,7 @@
    <widget class="QLabel" name="time_forHold">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>110</x>
       <y>160</y>
       <width>251</width>
       <height>41</height>
@@ -436,12 +436,17 @@
    <widget class="QComboBox" name="combo_holdTime">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>380</x>
       <y>170</y>
       <width>141</width>
       <height>21</height>
      </rect>
     </property>
+    <item>
+     <property name="text">
+      <string>Familiarization</string>
+     </property>
+    </item>
     <item>
      <property name="text">
       <string>pre-exercise</string>
@@ -467,6 +472,45 @@
       <string>120</string>
      </property>
     </item>
+   </widget>
+   <widget class="QLabel" name="trials_famil_label">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>170</y>
+      <width>201</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Trials For Familiarization</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="text_trialFamil">
+    <property name="geometry">
+     <rect>
+      <x>780</x>
+      <y>170</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>10</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="presentCross">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>480</y>
+      <width>141</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Present Cross</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
